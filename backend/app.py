@@ -49,7 +49,7 @@ def create_app():
     # ── Database ──────────────────────────────────────────
     init_db()
 
-    # ── Blueprints ────────────────────────────────────────
+        # ── Blueprints ────────────────────────────────────────
     app.register_blueprint(auth_bp,     url_prefix='/api/auth')
     app.register_blueprint(chat_bp,     url_prefix='/api/chat')
     app.register_blueprint(quiz_bp,     url_prefix='/api/quiz')
@@ -57,20 +57,26 @@ def create_app():
     app.register_blueprint(upload_bp,   url_prefix='/api/upload')
     app.register_blueprint(progress_bp, url_prefix='/api/progress')
 
-    @app.get('/api/health')
-    def health():
-        return {'status': 'ok', 'message': 'TamilAI API is running'}
-    
+    # Root route
     @app.get("/")
     def home():
         return {
-        "message": "TamilAI Backend is Running 🚀"
-    }
+            "status": "ok",
+            "message": "TamilAI Backend is Running 🚀"
+        }
+
+    # Health check
+    @app.get("/api/health")
+    def health():
+        return {
+            "status": "ok",
+            "message": "TamilAI API is running"
+        }
 
     return app
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = create_app()
 
     port = int(os.environ.get("PORT", 5000))
