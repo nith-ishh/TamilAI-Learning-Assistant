@@ -1,0 +1,22 @@
+# Environment
+.env
+
+# Python
+__pycache__/
+*.pyc
+
+# Virtual Environment
+venv/
+env/
+
+# Uploads
+uploads/
+
+# FAISS
+faiss_indexes/
+
+# VSCode
+.vscode/
+
+# Logs
+*.log

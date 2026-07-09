@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TamilAI – My Profile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --blue:#2563EB;--purple:#7C3AED;--cyan:#06B6D4;
+      --green:#10B981;--red:#EF4444;--amber:#F59E0B;
+      --gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;
+      --gray-400:#94A3B8;--gray-500:#64748B;--gray-600:#475569;
+      --gray-700:#334155;--gray-800:#1E293B;--gray-900:#0F172A;
+      --sidebar-w:260px;
+      --font:'Inter',sans-serif;--font-t:'Noto Sans Tamil','Inter',sans-serif;
+    }
+    html,body{height:100%}
+    body{font-family:var(--font);background:var(--gray-50);display:flex;-webkit-font-smoothing:antialiased}
+ 
+    .sidebar{width:var(--sidebar-w);flex-shrink:0;background:#fff;border-right:1px solid var(--gray-200);display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;z-index:100}
+    .sidebar-header{padding:20px;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;gap:10px}
+    .logo-icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:17px;color:#fff;font-weight:800;font-family:var(--font-t)}
+    .logo-text{font-size:17px;font-weight:700;color:var(--gray-900)}
+    .logo-text span{background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .sidebar-nav{flex:1;padding:12px;overflow-y:auto}
+    .nav-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray-400);padding:8px 8px 6px}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;font-size:14px;font-weight:500;color:var(--gray-600);cursor:pointer;margin-bottom:2px;text-decoration:none;transition:background .15s,color .15s}
+    .nav-item:hover{background:var(--gray-50);color:var(--gray-900)}
+    .nav-item.active{background:rgba(37,99,235,.08);color:var(--blue);font-weight:600}
+    .nav-icon{width:28px;height:28px;border-radius:6px;background:var(--gray-200);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+ 
+    .main{margin-left:var(--sidebar-w);flex:1;overflow-y:auto}
+    .topbar{background:#fff;border-bottom:1px solid var(--gray-200);padding:0 32px;height:64px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:50}
+    .topbar-title{font-size:18px;font-weight:700;color:var(--gray-900)}
+    .content{padding:28px 32px;max-width:1000px;margin:0 auto}
+ 
+    /* Profile layout */
+    .profile-layout{display:grid;grid-template-columns:280px 1fr;gap:24px}
+ 
+    /* LEFT: Avatar card */
+    .avatar-card{background:#fff;border:1px solid var(--gray-200);border-radius:16px;padding:28px;text-align:center}
+    .avatar-wrap{position:relative;width:96px;height:96px;margin:0 auto 16px}
+    .avatar-img{width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:800;color:#fff;border:3px solid var(--gray-200)}
+    .avatar-edit{position:absolute;bottom:0;right:0;width:28px;height:28px;border-radius:50%;background:var(--blue);border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;transition:background .2s}
+    .avatar-edit:hover{background:var(--purple)}
+    .profile-name{font-size:18px;font-weight:800;color:var(--gray-900);margin-bottom:4px}
+    .profile-role{font-size:13px;color:var(--gray-400);margin-bottom:4px}
+    .profile-school{font-size:12px;color:var(--gray-500);font-family:var(--font-t)}
+ 
+    /* Level badge */
+    .level-badge{display:inline-flex;align-items:center;gap:6px;margin:14px auto;padding:7px 16px;border-radius:99px;background:linear-gradient(135deg,rgba(245,158,11,.1),rgba(236,72,153,.1));border:1px solid rgba(245,158,11,.3);font-size:13px;font-weight:700;color:var(--amber)}
+    .xp-mini{margin-top:10px}
+    .xp-mini-label{display:flex;justify-content:space-between;font-size:11px;color:var(--gray-400);margin-bottom:5px;font-weight:600}
+    .xp-mini-bar{height:7px;background:var(--gray-100);border-radius:99px;overflow:hidden}
+    .xp-mini-fill{height:100%;background:linear-gradient(90deg,var(--amber),var(--pink,#EC4899));border-radius:99px;transition:width 1s ease}
+ 
+    /* Quick stats */
+    .quick-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+    .qs-item{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:10px;padding:10px;text-align:center}
+    .qs-num{font-size:20px;font-weight:800;color:var(--gray-900)}
+    .qs-label{font-size:10px;color:var(--gray-400);margin-top:2px;font-weight:600}
+ 
+    /* Avatar picker */
+    .avatar-picker{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:16px}
+    .av-option{width:100%;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;border:2px solid transparent;transition:all .2s}
+    .av-option:hover{transform:scale(1.1)}
+    .av-option.selected{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.2)}
+ 
+    /* Settings sections */
+    .settings-sections{display:flex;flex-direction:column;gap:16px}
+    .settings-card{background:#fff;border:1px solid var(--gray-200);border-radius:16px;overflow:hidden}
+    .settings-header{padding:18px 20px;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;gap:8px}
+    .settings-header h3{font-size:14px;font-weight:700;color:var(--gray-900)}
+    .settings-body{padding:20px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+    .form-group{margin-bottom:14px}
+    .form-label{font-size:12px;font-weight:600;color:var(--gray-600);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.5px}
+    .form-input,.form-select{width:100%;padding:10px 13px;border:1.5px solid var(--gray-200);border-radius:9px;font-size:14px;font-family:var(--font);color:var(--gray-800);background:#fff;outline:none;transition:border-color .2s,box-shadow .2s}
+    .form-input:focus,.form-select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+ 
+    .save-btn{padding:10px 24px;border-radius:9px;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;border:none;font-size:14px;font-weight:700;cursor:pointer;transition:opacity .2s,transform .2s;box-shadow:0 2px 10px rgba(37,99,235,.25)}
+    .save-btn:hover{opacity:.92;transform:translateY(-1px)}
+    .cancel-btn{padding:10px 20px;border-radius:9px;border:1.5px solid var(--gray-200);background:#fff;font-size:14px;font-weight:600;cursor:pointer;color:var(--gray-600);transition:all .2s;margin-left:8px}
+    .cancel-btn:hover{border-color:var(--gray-400);color:var(--gray-800)}
+ 
+    /* Toggle switch */
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--gray-100)}
+    .toggle-row:last-child{border-bottom:none}
+    .toggle-label{font-size:14px;font-weight:500;color:var(--gray-800)}
+    .toggle-sub{font-size:12px;color:var(--gray-400);margin-top:2px}
+    .toggle{position:relative;width:44px;height:24px;flex-shrink:0}
+    .toggle input{opacity:0;width:0;height:0}
+    .toggle-slider{position:absolute;inset:0;background:var(--gray-300);border-radius:99px;cursor:pointer;transition:background .2s}
+    .toggle-slider::before{content:'';position:absolute;height:18px;width:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+    .toggle input:checked + .toggle-slider{background:var(--blue)}
+    .toggle input:checked + .toggle-slider::before{transform:translateX(20px)}
+ 
+    /* Danger zone */
+    .danger-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--gray-100)}
+    .danger-item:last-child{border-bottom:none}
+    .danger-label{font-size:14px;font-weight:500;color:var(--gray-800)}
+    .danger-sub{font-size:12px;color:var(--gray-400);margin-top:2px}
+    .danger-btn{padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1.5px solid var(--red);color:var(--red);background:transparent;transition:all .2s}
+    .danger-btn:hover{background:var(--red);color:#fff}
+ 
+    /* Toast */
+    .toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;z-index:9999;animation:toastIn .3s ease;box-shadow:0 4px 20px rgba(0,0,0,.15);display:flex;align-items:center;gap:8px}
+    @keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+ 
+    /* Success banner */
+    .success-banner{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:10px;padding:12px 16px;font-size:13px;color:#059669;font-weight:600;display:none;margin-bottom:16px;align-items:center;gap:8px}
+    .success-banner.show{display:flex}
+ 
+    @media(max-width:900px){.profile-layout{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}}
+    @media(max-width:768px){.sidebar{display:none}.main{margin-left:0}.content{padding:16px}}
+  </style>
+</head>
+<body>
+ 
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-icon">த</div>
+    <span class="logo-text">Tamil<span>AI</span></span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Main</div>
+    <a class="nav-item" href="dashboard.html"><div class="nav-icon">🏠</div> Dashboard</a>
+    <a class="nav-item" href="tutor.html"><div class="nav-icon">🤖</div> AI Tutor</a>
+    <a class="nav-item" href="voice.html"><div class="nav-icon">🎤</div> Voice Tutor</a>
+    <a class="nav-item" href="textbook.html"><div class="nav-icon">📚</div> My Textbooks</a>
+    <div class="nav-label" style="margin-top:8px">Learning</div>
+    <a class="nav-item" href="quiz.html"><div class="nav-icon">❓</div> Quiz Generator</a>
+    <a class="nav-item" href="notes.html"><div class="nav-icon">📝</div> Notes AI</a>
+    <a class="nav-item" href="planner.html"><div class="nav-icon">📅</div> Study Planner</a>
+    <div class="nav-label" style="margin-top:8px">Track</div>
+    <a class="nav-item" href="progress.html"><div class="nav-icon">📈</div> My Progress</a>
+    <a class="nav-item" href="achievements.html"><div class="nav-icon">🏆</div> Achievements</a>
+    <a class="nav-item active"><div class="nav-icon">👤</div> My Profile</a>
+  </nav>
+</aside>
+ 
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">👤 My Profile</div>
+      <div class="topbar-sub" style="font-size:13px;color:var(--gray-400)">உங்கள் கணக்கு அமைப்புகள்</div>
+    </div>
+    <div style="margin-left:auto">
+      <button onclick="location.href='dashboard.html'" style="padding:8px 16px;border-radius:8px;border:1.5px solid var(--gray-200);background:#fff;font-size:13px;font-weight:600;cursor:pointer;color:var(--gray-700)">← Dashboard</button>
+    </div>
+  </div>
+ 
+  <div class="content">
+    <div class="profile-layout">
+ 
+      <!-- LEFT: Avatar + Stats -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+ 
+        <div class="avatar-card">
+          <div class="avatar-wrap">
+            <div class="avatar-img" id="mainAvatar">ஸ்</div>
+            <div class="avatar-edit" onclick="toggleAvatarPicker()" title="Change avatar">✏️</div>
+          </div>
+          <div class="profile-name" id="displayName">Student</div>
+          <div class="profile-role" id="displayRole">Class 10 Student</div>
+          <div class="profile-school" id="displaySchool">School Name</div>
+ 
+          <div class="level-badge">⚡ Level 8 · Rising Star</div>
+ 
+          <div class="xp-mini">
+            <div class="xp-mini-label">
+              <span>XP Progress</span>
+              <span id="xpDisplay">2,840 / 3,000</span>
+            </div>
+            <div class="xp-mini-bar">
+              <div class="xp-mini-fill" id="xpMiniBar" style="width:0%"></div>
+            </div>
+          </div>
+ 
+          <div class="quick-stats">
+            <div class="qs-item"><div class="qs-num" id="qsQuizzes">24</div><div class="qs-label">Quizzes</div></div>
+            <div class="qs-item"><div class="qs-num" id="qsStreak">🔥14</div><div class="qs-label">Streak</div></div>
+            <div class="qs-item"><div class="qs-num" id="qsTopics">47</div><div class="qs-label">Topics</div></div>
+            <div class="qs-item"><div class="qs-num" id="qsRank">#12</div><div class="qs-label">Class Rank</div></div>
+          </div>
+ 
+          <!-- Avatar Picker (hidden) -->
+          <div id="avatarPicker" style="display:none;margin-top:16px">
+            <div style="font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Choose Avatar</div>
+            <div class="avatar-picker" id="avatarPickerGrid"></div>
+          </div>
+        </div>
+ 
+        <!-- Linked accounts -->
+        <div class="settings-card">
+          <div class="settings-header"><span>🔗</span><h3>Linked Accounts</h3></div>
+          <div class="settings-body" style="padding:16px 20px">
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--gray-100)">
+              <div style="width:32px;height:32px;border-radius:8px;background:#fff;border:1px solid var(--gray-200);display:flex;align-items:center;justify-content:center;font-size:16px">G</div>
+              <div><div style="font-size:13px;font-weight:600;color:var(--gray-800)">Google</div><div style="font-size:11px;color:var(--gray-400)">Not connected</div></div>
+              <button onclick="showToast('Google SSO coming soon!','info')" style="margin-left:auto;padding:5px 12px;border-radius:7px;border:1.5px solid var(--blue);background:transparent;color:var(--blue);font-size:12px;font-weight:600;cursor:pointer">Connect</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 0">
+              <div style="width:32px;height:32px;border-radius:8px;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:16px">📱</div>
+              <div><div style="font-size:13px;font-weight:600;color:var(--gray-800)">Phone Number</div><div style="font-size:11px;color:var(--green);font-weight:600">✓ Verified</div></div>
+            </div>
+          </div>
+        </div>
+ 
+      </div>
+ 
+      <!-- RIGHT: Settings -->
+      <div class="settings-sections">
+ 
+        <!-- Personal Info -->
+        <div class="settings-card">
+          <div class="settings-header"><span>👤</span><h3>Personal Information</h3></div>
+          <div class="settings-body">
+            <div class="success-banner" id="profileSuccess">✅ Profile updated successfully!</div>
+            <div class="form-row">
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label">Full Name</label>
+                <input class="form-input" id="fieldName" placeholder="Your full name"/>
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label">Email</label>
+                <input class="form-input" id="fieldEmail" type="email" placeholder="email@example.com"/>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label">Class / Grade</label>
+                <select class="form-select" id="fieldClass">
+                  <option value="">Select class</option>
+                  <option>Class 6</option><option>Class 7</option><option>Class 8</option>
+                  <option>Class 9</option><option selected>Class 10</option>
+                  <option>Class 11</option><option>Class 12</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label">School Name</label>
+                <input class="form-input" id="fieldSchool" placeholder="Your school"/>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label">District</label>
+                <select class="form-select" id="fieldDistrict">
+                  <option>Madurai</option><option>Chennai</option><option>Coimbatore</option>
+                  <option>Trichy</option><option>Salem</option><option>Tirunelveli</option>
+                  <option>Erode</option><option>Vellore</option><option>Thanjavur</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label">Medium of Instruction</label>
+                <select class="form-select" id="fieldMedium">
+                  <option>Tamil Medium</option><option>English Medium</option>
+                </select>
+              </div>
+            </div>
+            <div style="margin-top:6px">
+              <button class="save-btn" onclick="saveProfile()">💾 Save Changes</button>
+              <button class="cancel-btn" onclick="loadProfile()">Cancel</button>
+            </div>
+          </div>
+        </div>
+ 
+        <!-- Learning Preferences -->
+        <div class="settings-card">
+          <div class="settings-header"><span>🎯</span><h3>Learning Preferences</h3></div>
+          <div class="settings-body">
+            <div class="form-row">
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label">Daily Study Goal</label>
+                <select class="form-select" id="fieldGoal">
+                  <option>1 hour</option><option>2 hours</option>
+                  <option selected>3 hours</option><option>4 hours</option><option>5+ hours</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label">Difficulty Preference</label>
+                <select class="form-select" id="fieldDiff">
+                  <option>Easy (Beginner)</option>
+                  <option selected>Medium (Standard)</option>
+                  <option>Hard (Advanced)</option>
+                  <option>Adaptive (AI decides)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Weak Subjects (for AI recommendations)</label>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px" id="weakSubjPicker">
+                <span class="subj-chip sel" onclick="toggleChip(this)">Chemistry</span>
+                <span class="subj-chip" onclick="toggleChip(this)">அறிவியல்</span>
+                <span class="subj-chip" onclick="toggleChip(this)">கணிதம்</span>
+                <span class="subj-chip" onclick="toggleChip(this)">தமிழ்</span>
+                <span class="subj-chip" onclick="toggleChip(this)">Physics</span>
+                <span class="subj-chip" onclick="toggleChip(this)">சமூகவியல்</span>
+                <span class="subj-chip" onclick="toggleChip(this)">English</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Exam Preparation Target</label>
+              <select class="form-select" id="fieldExam">
+                <option>Samacheer Kalvi Board Exam</option>
+                <option>NEET Preparation</option>
+                <option>JEE Preparation</option>
+                <option>TNPSC Preparation</option>
+                <option>General Learning</option>
+              </select>
+            </div>
+            <button class="save-btn" onclick="saveLearning()">💾 Save Preferences</button>
+          </div>
+        </div>
+ 
+        <!-- Notifications -->
+        <div class="settings-card">
+          <div class="settings-header"><span>🔔</span><h3>Notifications</h3></div>
+          <div class="settings-body" style="padding:8px 20px 16px">
+            <div class="toggle-row">
+              <div><div class="toggle-label">Daily Study Reminder</div><div class="toggle-sub">Remind me to study every day</div></div>
+              <label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Quiz Results</div><div class="toggle-sub">Notify when AI grades my quiz</div></div>
+              <label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Streak Alerts</div><div class="toggle-sub">Warn me before my streak breaks</div></div>
+              <label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Leaderboard Updates</div><div class="toggle-sub">Notify when my rank changes</div></div>
+              <label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">AI Recommendations</div><div class="toggle-sub">Weekly personalized study tips</div></div>
+              <label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+        </div>
+ 
+        <!-- Change Password -->
+        <div class="settings-card">
+          <div class="settings-header"><span>🔒</span><h3>Security</h3></div>
+          <div class="settings-body">
+            <div class="success-banner" id="pwdSuccess">✅ Password changed successfully!</div>
+            <div class="form-row">
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label">Current Password</label>
+                <input class="form-input" type="password" id="currentPwd" placeholder="Current password"/>
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label">New Password</label>
+                <input class="form-input" type="password" id="newPwd" placeholder="New password (min 6 chars)"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Confirm New Password</label>
+              <input class="form-input" type="password" id="confirmPwd" placeholder="Repeat new password" style="max-width:340px"/>
+            </div>
+            <button class="save-btn" onclick="changePassword()">🔒 Change Password</button>
+          </div>
+        </div>
+ 
+        <!-- Danger Zone -->
+        <div class="settings-card" style="border-color:rgba(239,68,68,.2)">
+          <div class="settings-header" style="border-bottom-color:rgba(239,68,68,.1)"><span>⚠️</span><h3 style="color:var(--red)">Danger Zone</h3></div>
+          <div class="settings-body" style="padding:8px 20px 16px">
+            <div class="danger-item">
+              <div><div class="danger-label">Export My Data</div><div class="danger-sub">Download all your data as JSON</div></div>
+              <button class="danger-btn" onclick="exportData()" style="border-color:var(--blue);color:var(--blue)">📦 Export</button>
+            </div>
+            <div class="danger-item">
+              <div><div class="danger-label">Reset Progress</div><div class="danger-sub">Clear all quiz history and XP</div></div>
+              <button class="danger-btn" onclick="resetProgress()">🔄 Reset</button>
+            </div>
+            <div class="danger-item">
+              <div><div class="danger-label">Delete Account</div><div class="danger-sub">Permanently delete your account and all data</div></div>
+              <button class="danger-btn" onclick="deleteAccount()">🗑 Delete</button>
+            </div>
+          </div>
+        </div>
+ 
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<style>
+.subj-chip{padding:5px 12px;border-radius:99px;font-size:12px;font-weight:600;border:1.5px solid var(--gray-200);background:#fff;color:var(--gray-600);cursor:pointer;transition:all .2s;font-family:var(--font-t)}
+.subj-chip.sel{border-color:var(--red);background:rgba(239,68,68,.07);color:var(--red)}
+.subj-chip:hover:not(.sel){border-color:var(--gray-400)}
+</style>
+ 
+<script>
+const API = 'http://localhost:5000/api';
+const token = localStorage.getItem('tamilai_token');
+let user = JSON.parse(localStorage.getItem('tamilai_user') || '{"name":"Student","email":"","class_grade":"Class 10","school":"","xp":2840,"streak":14}');
+ 
+const AVATARS = [
+  {emoji:'🧑‍🎓',bg:'#2563EB'},{emoji:'👩‍🎓',bg:'#7C3AED'},{emoji:'👨‍💻',bg:'#06B6D4'},
+  {emoji:'👩‍💻',bg:'#10B981'},{emoji:'🧑‍🏫',bg:'#F59E0B'},{emoji:'🦁',bg:'#EF4444'},
+  {emoji:'🦊',bg:'#F97316'},{emoji:'🐯',bg:'#8B5CF6'},{emoji:'🦅',bg:'#14B8A6'},
+  {emoji:'⭐',bg:'#EC4899'},
+];
+ 
+let selectedAvatar = AVATARS[0];
+ 
+function loadProfile() {
+  document.getElementById('fieldName').value   = user.name || '';
+  document.getElementById('fieldEmail').value  = user.email || '';
+  document.getElementById('fieldSchool').value = user.school || '';
+  const cls = document.getElementById('fieldClass');
+  [...cls.options].forEach(o => { if(o.value===user.class_grade||o.text===user.class_grade) o.selected=true; });
+ 
+  // Display
+  const initials = (user.name||'S').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('mainAvatar').textContent   = initials;
+  document.getElementById('displayName').textContent  = user.name || 'Student';
+  document.getElementById('displayRole').textContent  = `${user.class_grade||'Class 10'} Student`;
+  document.getElementById('displaySchool').textContent= user.school || 'School Name';
+  document.getElementById('xpDisplay').textContent    = `${(user.xp||0).toLocaleString()} / ${Math.ceil((user.xp||0)/500)*500}`;
+  document.getElementById('qsStreak').textContent     = `🔥${user.streak||0}`;
+  setTimeout(() => {
+    const pct = ((user.xp||0) % 500) / 500 * 100;
+    document.getElementById('xpMiniBar').style.width = pct+'%';
+  }, 300);
+}
+ 
+function buildAvatarPicker() {
+  const el = document.getElementById('avatarPickerGrid');
+  el.innerHTML = AVATARS.map((a,i) => `
+    <div class="av-option ${i===0?'selected':''}" style="background:${a.bg}" onclick="selectAvatar(${i},this)">${a.emoji}</div>`
+  ).join('');
+}
+ 
+function selectAvatar(idx, el) {
+  document.querySelectorAll('.av-option').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedAvatar = AVATARS[idx];
+  document.getElementById('mainAvatar').style.background = `linear-gradient(135deg,${selectedAvatar.bg},${selectedAvatar.bg}99)`;
+  document.getElementById('mainAvatar').textContent = selectedAvatar.emoji;
+  showToast('Avatar updated! ✨','success');
+}
+ 
+function toggleAvatarPicker() {
+  const el = document.getElementById('avatarPicker');
+  el.style.display = el.style.display==='none' ? 'block' : 'none';
+}
+ 
+function toggleChip(el) { el.classList.toggle('sel'); }
+ 
+async function saveProfile() {
+  const name   = document.getElementById('fieldName').value.trim();
+  const email  = document.getElementById('fieldEmail').value.trim();
+  const cls    = document.getElementById('fieldClass').value;
+  const school = document.getElementById('fieldSchool').value.trim();
+ 
+  if (!name) { showToast('Name is required','error'); return; }
+ 
+  try {
+    const res = await fetch(`${API}/auth/profile`, {
+      method:'PUT',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${token||''}`},
+      body: JSON.stringify({name,class_grade:cls,school})
+    });
+    if (res.ok) {
+      user = {...user,name,class_grade:cls,school};
+      localStorage.setItem('tamilai_user',JSON.stringify(user));
+    }
+  } catch {}
+ 
+  user = {...user, name, class_grade:cls, school};
+  localStorage.setItem('tamilai_user', JSON.stringify(user));
+  loadProfile();
+  const b = document.getElementById('profileSuccess');
+  b.classList.add('show');
+  setTimeout(() => b.classList.remove('show'), 3000);
+  showToast('Profile saved! ✅','success');
+}
+ 
+function saveLearning() { showToast('Learning preferences saved! 🎯','success'); }
+ 
+function changePassword() {
+  const curr    = document.getElementById('currentPwd').value;
+  const newp    = document.getElementById('newPwd').value;
+  const confirm = document.getElementById('confirmPwd').value;
+  if (!curr || !newp) { showToast('All fields required','error'); return; }
+  if (newp !== confirm){ showToast('Passwords do not match','error'); return; }
+  if (newp.length < 6) { showToast('Password too short','error'); return; }
+  document.getElementById('currentPwd').value = '';
+  document.getElementById('newPwd').value = '';
+  document.getElementById('confirmPwd').value = '';
+  const b = document.getElementById('pwdSuccess');
+  b.classList.add('show');
+  setTimeout(() => b.classList.remove('show'), 3000);
+  showToast('Password changed! 🔒','success');
+}
+ 
+function exportData() {
+  const data = { user, sessions:JSON.parse(localStorage.getItem('tamilai_plan')||'[]'), books:JSON.parse(localStorage.getItem('tamilai_books')||'[]') };
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='tamilai-data.json'; a.click();
+  showToast('Data exported! 📦','success');
+}
+ 
+function resetProgress() {
+  if (!confirm('Reset ALL quiz history and XP? This cannot be undone.')) return;
+  user.xp=0; user.streak=0;
+  localStorage.setItem('tamilai_user',JSON.stringify(user));
+  loadProfile();
+  showToast('Progress reset','info');
+}
+ 
+function deleteAccount() {
+  if (!confirm('Permanently delete your account? This cannot be undone.')) return;
+  if (!confirm('Are you absolutely sure? All your data will be lost.')) return;
+  localStorage.clear();
+  window.location.href='auth.html';
+}
+ 
+function showToast(msg, type='success') {
+  const colors={success:'#10B981',error:'#EF4444',info:'#2563EB'};
+  const icons ={success:'✅',error:'❌',info:'ℹ️'};
+  const t = document.createElement('div');
+  t.className='toast';
+  t.style.background=colors[type]; t.style.color='#fff';
+  t.innerHTML=`${icons[type]} ${msg}`;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3000);
+}
+ 
+// Init
+loadProfile();
+buildAvatarPicker();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/auth-guard.js"></script>
+<script src="js/logout.js"></script>
+<script>
+(async function () {
+
+    const { data } = await supabaseClient.auth.getSession();
+
+    if (!data.session) {
+        window.location.href = "auth.html";
+    }
+
+})();
+</script>
+</body>
+</html>

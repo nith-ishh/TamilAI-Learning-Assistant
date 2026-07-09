@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TamilAI – My Progress</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --blue:#2563EB;--purple:#7C3AED;--cyan:#06B6D4;
+      --green:#10B981;--red:#EF4444;--amber:#F59E0B;
+      --gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;
+      --gray-400:#94A3B8;--gray-500:#64748B;--gray-600:#475569;
+      --gray-700:#334155;--gray-800:#1E293B;--gray-900:#0F172A;
+      --sidebar-w:260px;
+      --font:'Inter',sans-serif;--font-t:'Noto Sans Tamil','Inter',sans-serif;
+    }
+    html,body{height:100%}
+    body{font-family:var(--font);background:var(--gray-50);display:flex;-webkit-font-smoothing:antialiased}
+ 
+    .sidebar{width:var(--sidebar-w);flex-shrink:0;background:#fff;border-right:1px solid var(--gray-200);display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;z-index:100}
+    .sidebar-header{padding:20px;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;gap:10px}
+    .logo-icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:17px;color:#fff;font-weight:800;font-family:var(--font-t)}
+    .logo-text{font-size:17px;font-weight:700;color:var(--gray-900)}
+    .logo-text span{background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .sidebar-nav{flex:1;padding:12px;overflow-y:auto}
+    .nav-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray-400);padding:8px 8px 6px}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;font-size:14px;font-weight:500;color:var(--gray-600);cursor:pointer;margin-bottom:2px;text-decoration:none;transition:background .15s,color .15s}
+    .nav-item:hover{background:var(--gray-50);color:var(--gray-900)}
+    .nav-item.active{background:rgba(37,99,235,.08);color:var(--blue);font-weight:600}
+    .nav-icon{width:28px;height:28px;border-radius:6px;background:var(--gray-200);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+ 
+    .main{margin-left:var(--sidebar-w);flex:1;overflow-y:auto}
+    .topbar{background:#fff;border-bottom:1px solid var(--gray-200);padding:0 32px;height:64px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:50}
+    .topbar-title{font-size:18px;font-weight:700;color:var(--gray-900)}
+    .topbar-sub{font-size:13px;color:var(--gray-400)}
+    .content{padding:28px 32px;max-width:1200px;margin:0 auto}
+ 
+    /* Period selector */
+    .period-tabs{display:flex;background:var(--gray-100);border-radius:10px;padding:4px;width:fit-content;margin-bottom:28px}
+    .period-tab{padding:7px 18px;border-radius:7px;font-size:13px;font-weight:600;color:var(--gray-500);cursor:pointer;transition:all .2s}
+    .period-tab.active{background:#fff;color:var(--gray-900);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+ 
+    /* KPI row */
+    .kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:24px}
+    .kpi-card{background:#fff;border:1px solid var(--gray-200);border-radius:14px;padding:18px 20px;transition:transform .2s,box-shadow .2s}
+    .kpi-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.07)}
+    .kpi-icon{font-size:24px;margin-bottom:8px;display:block}
+    .kpi-num{font-size:28px;font-weight:800;color:var(--gray-900);line-height:1}
+    .kpi-label{font-size:12px;color:var(--gray-500);margin-top:4px;font-weight:500}
+    .kpi-change{font-size:11px;margin-top:5px;font-weight:600}
+    .kpi-change.up{color:var(--green)}.kpi-change.down{color:var(--red)}
+ 
+    /* Chart grid */
+    .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px}
+    .chart-card{background:#fff;border:1px solid var(--gray-200);border-radius:14px;overflow:hidden}
+    .chart-header{padding:18px 20px 0;display:flex;align-items:center;justify-content:space-between}
+    .chart-title{font-size:15px;font-weight:700;color:var(--gray-900)}
+    .chart-sub{font-size:12px;color:var(--gray-400);margin-top:2px}
+    .chart-body{padding:16px 20px 20px}
+    .chart-full{grid-column:1/-1}
+ 
+    /* Subject performance table */
+    .subj-table{width:100%;border-collapse:collapse}
+    .subj-table th{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--gray-400);padding:8px 12px;text-align:left;border-bottom:1px solid var(--gray-200)}
+    .subj-table td{padding:12px 12px;border-bottom:1px solid var(--gray-100);font-size:14px;color:var(--gray-800)}
+    .subj-table tr:last-child td{border-bottom:none}
+    .subj-table tr:hover td{background:var(--gray-50)}
+    .pct-bar-wrap{width:120px;height:8px;background:var(--gray-100);border-radius:99px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:8px}
+    .pct-bar-fill{height:100%;border-radius:99px}
+    .trend-up{color:var(--green);font-weight:700}
+    .trend-dn{color:var(--red);font-weight:700}
+    .status-badge{font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px}
+    .status-strong{background:rgba(16,185,129,.1);color:#059669}
+    .status-avg{background:rgba(245,158,11,.1);color:#B45309}
+    .status-weak{background:rgba(239,68,68,.1);color:#DC2626}
+ 
+    /* Heatmap */
+    .heatmap-grid{display:grid;grid-template-columns:repeat(53,1fr);gap:3px;margin-top:12px}
+    .hm-cell{aspect-ratio:1;border-radius:3px;background:var(--gray-100);transition:transform .15s}
+    .hm-cell:hover{transform:scale(1.3)}
+    .hm-0{background:var(--gray-100)}
+    .hm-1{background:rgba(37,99,235,.2)}
+    .hm-2{background:rgba(37,99,235,.4)}
+    .hm-3{background:rgba(37,99,235,.7)}
+    .hm-4{background:var(--blue)}
+    .hm-months{display:flex;gap:0;margin-bottom:4px}
+    .hm-month{font-size:10px;color:var(--gray-400);font-weight:600}
+    .hm-days{display:flex;flex-direction:column;gap:3px;margin-right:6px;padding-top:1px}
+    .hm-day{font-size:10px;color:var(--gray-400);height:14px;display:flex;align-items:center}
+    .hm-legend{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:11px;color:var(--gray-400)}
+    .hm-leg-cell{width:12px;height:12px;border-radius:2px}
+ 
+    /* AI Insights */
+    .insights-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+    .insight-card{background:#fff;border:1px solid var(--gray-200);border-radius:14px;padding:20px}
+    .insight-emoji{font-size:28px;margin-bottom:10px;display:block}
+    .insight-title{font-size:14px;font-weight:700;color:var(--gray-900);margin-bottom:6px}
+    .insight-body{font-size:13px;color:var(--gray-600);line-height:1.6;font-family:var(--font-t)}
+    .insight-action{display:inline-flex;align-items:center;gap:4px;margin-top:10px;font-size:12px;font-weight:600;color:var(--blue);cursor:pointer;text-decoration:none}
+    .insight-action:hover{opacity:.75}
+    .insight-card.warn{border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.03)}
+    .insight-card.success{border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.03)}
+    .insight-card.info{border-color:rgba(37,99,235,.2);background:rgba(37,99,235,.03)}
+ 
+    /* Leaderboard */
+    .lb-card{background:#fff;border:1px solid var(--gray-200);border-radius:14px;overflow:hidden}
+    .lb-row{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--gray-100);transition:background .15s}
+    .lb-row:last-child{border-bottom:none}
+    .lb-row:hover{background:var(--gray-50)}
+    .lb-row.me{background:rgba(37,99,235,.04);border-left:3px solid var(--blue)}
+    .lb-rank{font-size:14px;font-weight:800;color:var(--gray-400);width:28px;text-align:center}
+    .lb-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+    .lb-name{font-size:14px;font-weight:600;color:var(--gray-800)}
+    .lb-grade{font-size:11px;color:var(--gray-400)}
+    .lb-xp{margin-left:auto;font-size:13px;font-weight:700;color:var(--amber)}
+    .lb-bar-wrap{width:80px;height:5px;background:var(--gray-100);border-radius:99px;overflow:hidden;margin-left:8px}
+    .lb-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--blue),var(--purple))}
+ 
+    @media(max-width:1100px){.kpi-row{grid-template-columns:repeat(3,1fr)}.charts-grid{grid-template-columns:1fr}.insights-grid{grid-template-columns:1fr}}
+    @media(max-width:768px){.sidebar{display:none}.main{margin-left:0}.content{padding:16px}.kpi-row{grid-template-columns:repeat(2,1fr)}}
+  </style>
+</head>
+<body>
+ 
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-icon">த</div>
+    <span class="logo-text">Tamil<span>AI</span></span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Main</div>
+    <a class="nav-item" href="dashboard.html"><div class="nav-icon">🏠</div> Dashboard</a>
+    <a class="nav-item" href="tutor.html"><div class="nav-icon">🤖</div> AI Tutor</a>
+    <a class="nav-item" href="voice.html"><div class="nav-icon">🎤</div> Voice Tutor</a>
+    <a class="nav-item" href="textbook.html"><div class="nav-icon">📚</div> My Textbooks</a>
+    <div class="nav-label" style="margin-top:8px">Learning</div>
+    <a class="nav-item" href="quiz.html"><div class="nav-icon">❓</div> Quiz Generator</a>
+    <a class="nav-item" href="notes.html"><div class="nav-icon">📝</div> Notes AI</a>
+    <a class="nav-item" href="planner.html"><div class="nav-icon">📅</div> Study Planner</a>
+    <div class="nav-label" style="margin-top:8px">Track</div>
+    <a class="nav-item active"><div class="nav-icon">📈</div> My Progress</a>
+    <a class="nav-item" href="#"><div class="nav-icon">🏆</div> Leaderboard</a>
+    <a class="nav-item" href="#"><div class="nav-icon">🎖</div> Achievements</a>
+  </nav>
+</aside>
+ 
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">📈 My Progress</div>
+      <div class="topbar-sub">உங்கள் கற்றல் பயணத்தின் முழு பகுப்பாய்வு</div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:10px">
+      <button onclick="location.href='dashboard.html'" style="padding:8px 16px;border-radius:8px;border:1.5px solid var(--gray-200);background:#fff;font-size:13px;font-weight:600;cursor:pointer;color:var(--gray-700)">← Dashboard</button>
+    </div>
+  </div>
+ 
+  <div class="content">
+ 
+    <!-- Period Tabs -->
+    <div class="period-tabs">
+      <div class="period-tab active" onclick="setPeriod('week',this)">This Week</div>
+      <div class="period-tab" onclick="setPeriod('month',this)">This Month</div>
+      <div class="period-tab" onclick="setPeriod('term',this)">This Term</div>
+      <div class="period-tab" onclick="setPeriod('all',this)">All Time</div>
+    </div>
+ 
+    <!-- KPI Row -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <span class="kpi-icon">⏱</span>
+        <div class="kpi-num" id="kpiHours">32h</div>
+        <div class="kpi-label">Study Hours</div>
+        <div class="kpi-change up">↑ 18% vs last week</div>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-icon">✅</span>
+        <div class="kpi-num" id="kpiAccuracy">84%</div>
+        <div class="kpi-label">Quiz Accuracy</div>
+        <div class="kpi-change up">↑ 7% improvement</div>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-icon">📚</span>
+        <div class="kpi-num" id="kpiTopics">47</div>
+        <div class="kpi-label">Topics Covered</div>
+        <div class="kpi-change up">↑ 12 new topics</div>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-icon">🔥</span>
+        <div class="kpi-num" id="kpiStreak">14</div>
+        <div class="kpi-label">Day Streak</div>
+        <div class="kpi-change up">🏆 Personal best!</div>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-icon">⚡</span>
+        <div class="kpi-num" id="kpiXP">2,840</div>
+        <div class="kpi-label">XP Earned</div>
+        <div class="kpi-change up">↑ Level 8</div>
+      </div>
+    </div>
+ 
+    <!-- AI Insights -->
+    <div class="insights-grid">
+      <div class="insight-card warn">
+        <span class="insight-emoji">⚠️</span>
+        <div class="insight-title">Weak Area Detected</div>
+        <div class="insight-body">Chemistry-ல் உங்கள் quiz accuracy 58% மட்டுமே. அமிலம் மற்றும் காரம் தலைப்பில் கூடுதல் பயிற்சி தேவை.</div>
+        <a class="insight-action" href="quiz.html">Practice now →</a>
+      </div>
+      <div class="insight-card success">
+        <span class="insight-emoji">🏆</span>
+        <div class="insight-title">Strong Performance</div>
+        <div class="insight-body">அறிவியல் மற்றும் சமூகவியலில் 90%+ score பெறுகிறீர்கள். இந்த subjects-ல் நீங்கள் class-ல் top 5-ல் இருக்கிறீர்கள்!</div>
+        <a class="insight-action" href="quiz.html">Challenge yourself →</a>
+      </div>
+      <div class="insight-card info">
+        <span class="insight-emoji">📅</span>
+        <div class="insight-title">Study Recommendation</div>
+        <div class="insight-body">தேர்வு 3 வாரங்களில் உள்ளது. AI plan-ன்படி daily 2.5 மணி நேரம் படித்தால் அனைத்து subjects-ஐயும் முடிக்கலாம்.</div>
+        <a class="insight-action" href="planner.html">View plan →</a>
+      </div>
+    </div>
+ 
+    <!-- Charts Row 1 -->
+    <div class="charts-grid">
+ 
+      <!-- Weekly Activity -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Weekly Study Activity</div>
+            <div class="chart-sub">Minutes studied per day</div>
+          </div>
+        </div>
+        <div class="chart-body"><canvas id="weeklyChart" height="180"></canvas></div>
+      </div>
+ 
+      <!-- Subject Accuracy -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Subject Quiz Accuracy</div>
+            <div class="chart-sub">Average score per subject</div>
+          </div>
+        </div>
+        <div class="chart-body"><canvas id="subjectChart" height="180"></canvas></div>
+      </div>
+ 
+      <!-- Monthly trend - full width -->
+      <div class="chart-card chart-full">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Monthly Progress Trend</div>
+            <div class="chart-sub">XP earned and topics covered over time</div>
+          </div>
+          <div style="display:flex;gap:14px;font-size:12px;font-weight:600">
+            <span style="color:var(--blue)">━ XP Earned</span>
+            <span style="color:var(--green)">━ Topics</span>
+          </div>
+        </div>
+        <div class="chart-body"><canvas id="trendChart" height="120"></canvas></div>
+      </div>
+ 
+    </div>
+ 
+    <!-- Subject Table + Leaderboard -->
+    <div style="display:grid;grid-template-columns:1fr 320px;gap:20px;margin-bottom:24px">
+ 
+      <!-- Subject breakdown -->
+      <div class="chart-card">
+        <div class="chart-header" style="padding-bottom:12px">
+          <div class="chart-title">Subject Performance Breakdown</div>
+        </div>
+        <div style="padding:0 20px 20px">
+          <table class="subj-table">
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Accuracy</th>
+                <th>Quizzes</th>
+                <th>Study Time</th>
+                <th>Trend</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="subjectTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+ 
+      <!-- Mini Leaderboard -->
+      <div class="lb-card">
+        <div class="chart-header" style="padding:18px 20px 14px">
+          <div class="chart-title">🏆 Class Leaderboard</div>
+        </div>
+        <div id="leaderboardBody"></div>
+      </div>
+    </div>
+ 
+    <!-- Activity Heatmap -->
+    <div class="chart-card" style="margin-bottom:24px">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Learning Activity Heatmap</div>
+          <div class="chart-sub">Daily study intensity over the past year</div>
+        </div>
+      </div>
+      <div style="padding:16px 20px 20px;overflow-x:auto">
+        <div style="display:flex;min-width:700px">
+          <div class="hm-days">
+            <div class="hm-day">Mon</div>
+            <div class="hm-day">Wed</div>
+            <div class="hm-day">Fri</div>
+          </div>
+          <div style="flex:1">
+            <div class="hm-months" id="hmMonths"></div>
+            <div class="heatmap-grid" id="heatmapGrid"></div>
+          </div>
+        </div>
+        <div class="hm-legend">
+          <span>Less</span>
+          <div class="hm-leg-cell hm-0"></div>
+          <div class="hm-leg-cell hm-1"></div>
+          <div class="hm-leg-cell hm-2"></div>
+          <div class="hm-leg-cell hm-3"></div>
+          <div class="hm-leg-cell hm-4"></div>
+          <span>More</span>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- Radar Chart: Skills -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:32px">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Skills Radar</div>
+          <div class="chart-sub">Overall competency by subject</div>
+        </div>
+        <div class="chart-body"><canvas id="radarChart" height="220"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Quiz Score Distribution</div>
+          <div class="chart-sub">Score ranges across all quizzes</div>
+        </div>
+        <div class="chart-body"><canvas id="distChart" height="220"></canvas></div>
+      </div>
+    </div>
+ 
+  </div>
+</div>
+ 
+<script>
+const API = 'http://localhost:5000/api';
+const token = localStorage.getItem('tamilai_token');
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.color = '#94A3B8';
+ 
+let charts = {};
+ 
+// ── Data ─────────────────────────────────────────────────────
+const data = {
+  weekly: { labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], study:[45,90,60,120,75,150,85], quizzes:[1,2,1,3,2,4,2] },
+  subjects: [
+    { name:'அறிவியல்', acc:87, quizzes:14, time:'8h 20m', trend:+5, color:'#2563EB' },
+    { name:'Physics',   acc:79, quizzes:10, time:'6h 10m', trend:+3, color:'#7C3AED' },
+    { name:'Chemistry', acc:58, quizzes:8,  time:'4h 30m', trend:-4, color:'#EF4444' },
+    { name:'கணிதம்',   acc:73, quizzes:12, time:'7h 00m', trend:+2, color:'#F59E0B' },
+    { name:'சமூகவியல்',acc:91, quizzes:9,  time:'5h 15m', trend:+7, color:'#10B981' },
+    { name:'தமிழ்',    acc:65, quizzes:7,  time:'4h 00m', trend:-1, color:'#06B6D4' },
+  ],
+  monthly: {
+    labels:['Aug','Sep','Oct','Nov','Dec','Jan','Feb'],
+    xp:[320,480,560,720,880,1240,1840],
+    topics:[8,12,14,18,22,32,47],
+  },
+  leaderboard: [
+    { rank:1,  name:'Priya L.',  grade:'Class 10', xp:3840, color:'#7C3AED', pct:100 },
+    { rank:2,  name:'Arjun K.',  grade:'Class 10', xp:3240, color:'#2563EB', pct:84  },
+    { rank:3,  name:'Kavya S.',  grade:'Class 10', xp:3010, color:'#06B6D4', pct:78  },
+    { rank:5,  name:'Ravi M.',   grade:'Class 10', xp:2640, color:'#10B981', pct:69  },
+    { rank:12, name:'You',       grade:'Class 10', xp:2840, color:'#F59E0B', pct:74, me:true },
+    { rank:15, name:'Meena T.',  grade:'Class 10', xp:2200, color:'#EF4444', pct:57  },
+  ],
+};
+ 
+function setPeriod(p, el) {
+  document.querySelectorAll('.period-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  // Re-render with different data (demo)
+  renderAll();
+}
+ 
+function renderAll() {
+  renderWeeklyChart();
+  renderSubjectChart();
+  renderTrendChart();
+  renderRadarChart();
+  renderDistChart();
+  renderSubjectTable();
+  renderLeaderboard();
+  renderHeatmap();
+}
+ 
+function renderWeeklyChart() {
+  if (charts.weekly) charts.weekly.destroy();
+  const ctx = document.getElementById('weeklyChart').getContext('2d');
+  charts.weekly = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels: data.weekly.labels,
+      datasets:[{
+        label:'Study Minutes',
+        data: data.weekly.study,
+        backgroundColor: ctx2 => {
+          const g = ctx2.chart.ctx.createLinearGradient(0,0,0,200);
+          g.addColorStop(0,'rgba(37,99,235,0.8)'); g.addColorStop(1,'rgba(124,58,237,0.4)');
+          return g;
+        },
+        borderRadius:6, borderSkipped:false,
+      }]
+    },
+    options:{
+      responsive:true, plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:12}}},
+        y:{grid:{color:'#F1F5F9'},ticks:{font:{size:12}},title:{display:true,text:'Minutes'}}
+      }
+    }
+  });
+}
+ 
+function renderSubjectChart() {
+  if (charts.subject) charts.subject.destroy();
+  const ctx = document.getElementById('subjectChart').getContext('2d');
+  charts.subject = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels: data.subjects.map(s=>s.name),
+      datasets:[{
+        label:'Accuracy %',
+        data: data.subjects.map(s=>s.acc),
+        backgroundColor: data.subjects.map(s=>s.color+'CC'),
+        borderRadius:6, borderSkipped:false,
+      }]
+    },
+    options:{
+      indexAxis:'y', responsive:true,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{color:'#F1F5F9'},min:0,max:100,ticks:{callback:v=>v+'%'}},
+        y:{grid:{display:false}}
+      }
+    }
+  });
+}
+ 
+function renderTrendChart() {
+  if (charts.trend) charts.trend.destroy();
+  const ctx = document.getElementById('trendChart').getContext('2d');
+  const gBlue = ctx.createLinearGradient(0,0,0,200);
+  gBlue.addColorStop(0,'rgba(37,99,235,.2)'); gBlue.addColorStop(1,'rgba(37,99,235,0)');
+  const gGreen = ctx.createLinearGradient(0,0,0,200);
+  gGreen.addColorStop(0,'rgba(16,185,129,.2)'); gGreen.addColorStop(1,'rgba(16,185,129,0)');
+ 
+  charts.trend = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels: data.monthly.labels,
+      datasets:[
+        { label:'XP Earned', data:data.monthly.xp, borderColor:'#2563EB', backgroundColor:gBlue, tension:.4, fill:true, pointRadius:4, pointBackgroundColor:'#2563EB' },
+        { label:'Topics', data:data.monthly.topics.map(t=>t*30), borderColor:'#10B981', backgroundColor:gGreen, tension:.4, fill:true, pointRadius:4, pointBackgroundColor:'#10B981' },
+      ]
+    },
+    options:{
+      responsive:true, plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{display:false}},
+        y:{grid:{color:'#F1F5F9'},ticks:{font:{size:11}}}
+      }
+    }
+  });
+}
+ 
+function renderRadarChart() {
+  if (charts.radar) charts.radar.destroy();
+  const ctx = document.getElementById('radarChart').getContext('2d');
+  charts.radar = new Chart(ctx, {
+    type:'radar',
+    data:{
+      labels: data.subjects.map(s=>s.name),
+      datasets:[{
+        label:'Your Score', data:data.subjects.map(s=>s.acc),
+        borderColor:'#2563EB', backgroundColor:'rgba(37,99,235,.15)',
+        pointBackgroundColor:'#2563EB', pointRadius:4, borderWidth:2,
+      },{
+        label:'Class Avg', data:[72,65,70,68,78,71],
+        borderColor:'rgba(148,163,184,.6)', backgroundColor:'rgba(148,163,184,.08)',
+        pointBackgroundColor:'#94A3B8', pointRadius:3, borderWidth:1.5, borderDash:[4,4],
+      }]
+    },
+    options:{
+      responsive:true,
+      scales:{r:{grid:{color:'#E2E8F0'},ticks:{display:false},min:0,max:100}},
+      plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:10,padding:16}}}
+    }
+  });
+}
+ 
+function renderDistChart() {
+  if (charts.dist) charts.dist.destroy();
+  const ctx = document.getElementById('distChart').getContext('2d');
+  charts.dist = new Chart(ctx, {
+    type:'doughnut',
+    data:{
+      labels:['90-100% 🏆','75-89% 🎉','50-74% 💪','<50% 📚'],
+      datasets:[{
+        data:[18,32,38,12],
+        backgroundColor:['#10B981','#2563EB','#F59E0B','#EF4444'],
+        borderWidth:0, hoverOffset:6,
+      }]
+    },
+    options:{
+      responsive:true, cutout:'65%',
+      plugins:{
+        legend:{position:'bottom',labels:{font:{size:11},boxWidth:10,padding:12}},
+        tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw} quizzes`}}
+      }
+    }
+  });
+}
+ 
+function renderSubjectTable() {
+  const tbody = document.getElementById('subjectTableBody');
+  tbody.innerHTML = data.subjects.map(s => {
+    const status = s.acc>=80 ? ['Strong','status-strong'] : s.acc>=65 ? ['Average','status-avg'] : ['Needs Work','status-weak'];
+    const trend  = s.trend>0 ? `<span class="trend-up">↑ +${s.trend}%</span>` : `<span class="trend-dn">↓ ${s.trend}%</span>`;
+    return `<tr>
+      <td><strong style="font-family:var(--font-t)">${s.name}</strong></td>
+      <td>
+        <span class="pct-bar-wrap"><span class="pct-bar-fill" style="width:${s.acc}%;background:${s.color}"></span></span>
+        <strong style="color:${s.color}">${s.acc}%</strong>
+      </td>
+      <td style="color:var(--gray-600)">${s.quizzes} quizzes</td>
+      <td style="color:var(--gray-600)">${s.time}</td>
+      <td>${trend}</td>
+      <td><span class="status-badge ${status[1]}">${status[0]}</span></td>
+    </tr>`;
+  }).join('');
+}
+ 
+function renderLeaderboard() {
+  const el = document.getElementById('leaderboardBody');
+  const rankIcons = {1:'🥇',2:'🥈',3:'🥉'};
+  el.innerHTML = data.leaderboard.map(p => `
+    <div class="lb-row${p.me?' me':''}">
+      <div class="lb-rank">${rankIcons[p.rank]||p.rank}</div>
+      <div class="lb-av" style="background:${p.color}">${p.name[0]}</div>
+      <div>
+        <div class="lb-name">${p.name}${p.me?' (You)':''}</div>
+        <div class="lb-grade">${p.grade}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-left:auto">
+        <div class="lb-bar-wrap"><div class="lb-bar" style="width:${p.pct}%"></div></div>
+        <div class="lb-xp">⚡ ${p.xp.toLocaleString()}</div>
+      </div>
+    </div>`).join('');
+}
+ 
+function renderHeatmap() {
+  const grid = document.getElementById('heatmapGrid');
+  grid.innerHTML = '';
+  const totalDays = 53 * 7;
+  const today = new Date();
+ 
+  for (let i = 0; i < totalDays; i++) {
+    const cell = document.createElement('div');
+    const dayDate = new Date(today);
+    dayDate.setDate(today.getDate() - (totalDays - i));
+ 
+    const isFuture = dayDate > today;
+    const rand = Math.random();
+    let level = 0;
+    if (!isFuture) {
+      if (rand > 0.6) level = 1;
+      if (rand > 0.75) level = 2;
+      if (rand > 0.88) level = 3;
+      if (rand > 0.95) level = 4;
+    }
+ 
+    cell.className = `hm-cell hm-${level}`;
+    cell.title = `${dayDate.toLocaleDateString('en-IN', {day:'numeric',month:'short'})}: ${level===0?'No activity':level===1?'Low':level===2?'Medium':level===3?'High':'Very High'}`;
+    grid.appendChild(cell);
+  }
+ 
+  // Month labels
+  const months = document.getElementById('hmMonths');
+  months.innerHTML = '';
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  for (let i = 0; i < 12; i++) {
+    const span = document.createElement('div');
+    span.className = 'hm-month';
+    span.style.flex = '1';
+    span.textContent = monthNames[(new Date().getMonth() - 11 + i + 12) % 12];
+    months.appendChild(span);
+  }
+}
+ 
+// Init
+renderAll();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/logout.js"></script>
+<script>
+(async function () {
+
+    const { data } = await supabaseClient.auth.getSession();
+
+    if (!data.session) {
+        window.location.href = "auth.html";
+    }
+
+})();
+</script>
+</body>
+</html>

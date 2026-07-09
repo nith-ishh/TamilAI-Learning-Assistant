@@ -1,0 +1,16 @@
+# Backend
+backend/.env
+backend/uploads/
+backend/faiss_indexes/
+backend/__pycache__/
+backend/venv/
+
+# Frontend
+frontend/node_modules/
+
+# VSCode
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

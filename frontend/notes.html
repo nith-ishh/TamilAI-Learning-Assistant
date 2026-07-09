@@ -1,0 +1,2354 @@
+
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TamilAI – Notes AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #2563EB;
+      --blue-light: #3B82F6;
+      --purple: #7C3AED;
+      --cyan: #06B6D4;
+      --green: #10B981;
+      --red: #EF4444;
+      --amber: #F59E0B;
+      --gray-50: #F8FAFC;
+      --gray-100: #F1F5F9;
+      --gray-200: #E2E8F0;
+      --gray-300: #CBD5E1;
+      --gray-400: #94A3B8;
+      --gray-500: #64748B;
+      --gray-600: #475569;
+      --gray-700: #334155;
+      --gray-800: #1E293B;
+      --gray-900: #0F172A;
+      --sidebar-w: 260px;
+      --font: 'Inter', sans-serif;
+      --font-tamil: 'Noto Sans Tamil', 'Inter', sans-serif;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+      --shadow-md: 0 4px 16px rgba(0,0,0,.08);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,.12);
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: var(--font);
+      background: var(--gray-50);
+      display: flex;
+      -webkit-font-smoothing: antialiased;
+      color: var(--gray-800);
+    }
+
+    /* ─────────────────────────────────────────────
+       SIDEBAR
+    ───────────────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      background: #fff;
+      border-right: 1px solid var(--gray-200);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      inset: 0 auto 0 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--gray-100);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #fff;
+      font-weight: 800;
+      font-family: var(--font-tamil);
+      box-shadow: 0 4px 12px rgba(37,99,235,.3);
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--gray-900);
+      letter-spacing: -0.3px;
+    }
+
+    .logo-text span {
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+    }
+
+    .sidebar-nav::-webkit-scrollbar { width: 3px; }
+    .sidebar-nav::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 99px; }
+
+    .nav-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--gray-400);
+      padding: 10px 8px 6px;
+      display: block;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gray-600);
+      cursor: pointer;
+      margin-bottom: 2px;
+      text-decoration: none;
+      transition: background .15s, color .15s;
+    }
+
+    .nav-item:hover { background: var(--gray-50); color: var(--gray-900); }
+
+    .nav-item.active {
+      background: rgba(37,99,235,.08);
+      color: var(--blue);
+      font-weight: 600;
+    }
+
+    .nav-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      background: var(--gray-100);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+      transition: background .15s;
+    }
+
+    .nav-item.active .nav-icon {
+      background: rgba(37,99,235,.12);
+    }
+
+    .sidebar-footer {
+      padding: 12px 16px;
+      border-top: 1px solid var(--gray-100);
+    }
+
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-500);
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      transition: background .15s, color .15s;
+    }
+
+    .logout-btn:hover { background: var(--gray-50); color: var(--red); }
+
+    /* ─────────────────────────────────────────────
+       MAIN LAYOUT
+    ───────────────────────────────────────────── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-y: auto;
+    }
+
+    /* ─────────────────────────────────────────────
+       TOP BAR
+    ───────────────────────────────────────────── */
+    .topbar {
+      background: #fff;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 32px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: var(--shadow-sm);
+      flex-shrink: 0;
+    }
+
+    .topbar-left { flex: 1; }
+
+    .topbar-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--gray-900);
+      letter-spacing: -0.3px;
+    }
+
+    .topbar-sub {
+      font-size: 12px;
+      color: var(--gray-400);
+      margin-top: 1px;
+      font-family: var(--font-tamil);
+    }
+
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+
+    .btn-back {
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--gray-200);
+      background: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--gray-700);
+      transition: all .18s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-back:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+      background: rgba(37,99,235,.04);
+    }
+
+    /* ─────────────────────────────────────────────
+       CONTENT AREA
+    ───────────────────────────────────────────── */
+    .content {
+      padding: 28px 32px;
+      max-width: 1140px;
+      margin: 0 auto;
+      width: 100%;
+      flex: 1;
+    }
+
+    /* ─────────────────────────────────────────────
+       NOTES GRID LAYOUT
+    ───────────────────────────────────────────── */
+    .notes-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* ─────────────────────────────────────────────
+       LEFT SETUP PANEL
+    ───────────────────────────────────────────── */
+    .setup-panel{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    overflow:visible;
+}
+
+    .panel-card {
+      background: #fff;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow .2s;
+    }
+
+    .panel-card:hover { box-shadow: var(--shadow-md); }
+
+    .panel-card h3 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--gray-800);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      letter-spacing: -0.1px;
+    }
+
+    .form-group { margin-bottom: 14px; }
+    .form-group:last-child { margin-bottom: 0; }
+
+    .form-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gray-500);
+      margin-bottom: 6px;
+      display: block;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-input,
+    .form-select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 9px;
+      font-size: 14px;
+      font-family: var(--font-tamil);
+      color: var(--gray-800);
+      background: #fff;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      appearance: none;
+    }
+
+    .form-input:focus,
+    .form-select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+    }
+
+    .form-input::placeholder { color: var(--gray-400); }
+
+    .select-wrap { position: relative; }
+
+    .select-wrap::after {
+      content: '▾';
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray-400);
+      pointer-events: none;
+      font-size: 12px;
+    }
+
+    /* ── NOTE TYPE LIST ──────────────────────────── */
+    .type-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .type-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--gray-200);
+      cursor: pointer;
+      transition: all .18s;
+      background: #fff;
+    }
+
+    .type-item:hover {
+      border-color: var(--blue);
+      background: rgba(37,99,235,.03);
+      transform: translateX(2px);
+    }
+
+    .type-item.selected {
+      border-color: var(--blue);
+      background: rgba(37,99,235,.07);
+      box-shadow: 0 0 0 1px rgba(37,99,235,.15);
+    }
+
+    .type-icon-wrap {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      background: var(--gray-50);
+      transition: background .18s;
+    }
+
+    .type-item.selected .type-icon-wrap { background: rgba(37,99,235,.1); }
+
+    .type-info { flex: 1; min-width: 0; }
+    .type-name { font-size: 13px; font-weight: 600; color: var(--gray-800); }
+    .type-desc { font-size: 11px; color: var(--gray-400); margin-top: 1px; }
+
+    .type-check {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1.5px solid var(--gray-300);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .18s;
+      font-size: 10px;
+      color: transparent;
+    }
+
+    .type-item.selected .type-check {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    /* ── GENERATE BUTTON ─────────────────────────── */
+    .generate-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: #fff;
+      border: none;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 20px rgba(37,99,235,.35);
+      transition: opacity .2s, transform .2s, box-shadow .2s;
+      letter-spacing: -0.2px;
+      position: relative;
+      overflow: hidden;
+      margin-top:18px;
+    }
+
+    .generate-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,.15), transparent);
+      opacity: 0;
+      transition: opacity .2s;
+    }
+
+    .generate-btn:hover {
+      opacity: .94;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(37,99,235,.45);
+    }
+
+    .generate-btn:hover::before { opacity: 1; }
+    .generate-btn:active { transform: translateY(0); }
+
+    .generate-btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    .generate-btn.loading .btn-spinner { display: block; }
+    .generate-btn.loading .btn-label { opacity: .7; }
+
+    /* ── MY SAVED NOTES ──────────────────────────── */
+    .note-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    .note-list::-webkit-scrollbar { width: 3px; }
+    .note-list::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 99px; }
+
+    .note-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--gray-200);
+      cursor: pointer;
+      transition: all .15s;
+      background: #fff;
+    }
+
+    .note-item:hover {
+      background: rgba(37,99,235,.04);
+      border-color: rgba(37,99,235,.25);
+      transform: translateX(2px);
+    }
+
+    .note-item.active {
+      background: rgba(37,99,235,.07);
+      border-color: var(--blue);
+    }
+
+    .note-emoji {
+      font-size: 18px;
+      flex-shrink: 0;
+      width: 28px;
+      text-align: center;
+    }
+
+    .note-info { flex: 1; min-width: 0; }
+
+    .note-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-800);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .note-meta {
+      font-size: 11px;
+      color: var(--gray-400);
+      margin-top: 1px;
+    }
+
+    .note-arrow {
+      font-size: 12px;
+      color: var(--gray-300);
+      flex-shrink: 0;
+      transition: color .15s;
+    }
+
+    .note-item:hover .note-arrow { color: var(--blue); }
+
+    /* ─────────────────────────────────────────────
+       RIGHT OUTPUT PANEL
+    ───────────────────────────────────────────── */
+    .output-panel { display: flex; flex-direction: column; }
+
+    /* ── EMPTY STATE ─────────────────────────────── */
+    .output-empty {
+      background: #fff;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      padding: 72px 40px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .empty-illustration {
+      width: 80px;
+      height: 80px;
+      border-radius: var(--radius-xl);
+      background: linear-gradient(135deg, rgba(37,99,235,.08), rgba(124,58,237,.08));
+      border: 1px solid rgba(37,99,235,.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      margin: 0 auto 20px;
+    }
+
+    .empty-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+      font-family: var(--font-tamil);
+    }
+
+    .empty-sub {
+      font-size: 14px;
+      color: var(--gray-400);
+      font-family: var(--font-tamil);
+      line-height: 1.7;
+      max-width: 380px;
+      margin: 0 auto;
+    }
+
+    .empty-chips {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .empty-chip {
+      padding: 6px 14px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--gray-100);
+      color: var(--gray-500);
+      cursor: pointer;
+      transition: all .18s;
+      font-family: var(--font-tamil);
+    }
+
+    .empty-chip:hover {
+      background: rgba(37,99,235,.1);
+      color: var(--blue);
+    }
+
+    /* ── LOADING STATE ───────────────────────────── */
+    .output-loading {
+      background: #fff;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      padding: 60px 40px;
+      text-align: center;
+      display: none;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .load-animation {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin: 0 auto 16px;
+      animation: loadPulse 1.4s ease-in-out infinite;
+      box-shadow: 0 8px 24px rgba(37,99,235,.35);
+    }
+
+    @keyframes loadPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 8px 24px rgba(37,99,235,.35); }
+      50% { transform: scale(1.08); box-shadow: 0 12px 32px rgba(37,99,235,.5); }
+    }
+
+    .load-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 6px;
+    }
+
+    .load-sub {
+      font-size: 13px;
+      color: var(--gray-400);
+      font-family: var(--font-tamil);
+      margin-bottom: 20px;
+    }
+
+    .load-bar-wrap {
+      width: 220px;
+      height: 4px;
+      background: var(--gray-100);
+      border-radius: 99px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+
+    .load-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--blue), var(--purple));
+      border-radius: 99px;
+      animation: loadBar 1.8s ease-in-out infinite;
+    }
+
+    @keyframes loadBar {
+      0% { width: 0%; margin-left: 0; }
+      50% { width: 70%; margin-left: 15%; }
+      100% { width: 0%; margin-left: 100%; }
+    }
+
+    /* ── NOTE OUTPUT ─────────────────────────────── */
+    .note-output {
+      background: #fff;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+
+    /* ── NOTE TOOLBAR ────────────────────────────── */
+    .note-toolbar {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      background: var(--gray-50);
+    }
+
+    .note-toolbar-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--gray-900);
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-family: var(--font-tamil);
+    }
+
+    .toolbar-btn {
+      padding: 7px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      border: 1.5px solid var(--gray-200);
+      background: #fff;
+      color: var(--gray-700);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      transition: all .18s;
+    }
+
+    .toolbar-btn:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+      background: rgba(37,99,235,.04);
+      transform: translateY(-1px);
+    }
+
+    .toolbar-btn.primary {
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 2px 10px rgba(37,99,235,.3);
+    }
+
+    .toolbar-btn.primary:hover {
+      opacity: .92;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(37,99,235,.4);
+    }
+
+    /* ── TAB BAR ─────────────────────────────────── */
+    .note-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 20px;
+      gap: 0;
+      overflow-x: auto;
+      background: #fff;
+    }
+
+    .note-tabs::-webkit-scrollbar { height: 2px; }
+    .note-tabs::-webkit-scrollbar-thumb { background: var(--gray-200); }
+
+    .note-tab {
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-400);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      white-space: nowrap;
+      transition: color .2s, border-color .2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .note-tab:hover { color: var(--gray-700); }
+
+    .note-tab.active {
+      color: var(--blue);
+      border-bottom-color: var(--blue);
+    }
+
+    /* ── NOTE BODY ───────────────────────────────── */
+    .note-body {
+      padding: 24px;
+      overflow-y: auto;
+      max-height: 62vh;
+      flex: 1;
+    }
+
+    .note-body::-webkit-scrollbar { width: 4px; }
+    .note-body::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 99px; }
+
+    /* ─────────────────────────────────────────────
+       CONTENT RENDERERS
+    ───────────────────────────────────────────── */
+
+    /* ── MARKDOWN / SUMMARY ──────────────────────── */
+    .note-markdown {
+      font-size: 15px;
+      line-height: 1.85;
+      color: var(--gray-800);
+      font-family: var(--font-tamil);
+    }
+
+    .note-markdown h2 {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--gray-900);
+      margin: 24px 0 10px;
+      letter-spacing: -.4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .note-markdown h2:first-child { margin-top: 0; }
+
+    .note-markdown h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--blue);
+      margin: 18px 0 8px;
+    }
+
+    .note-markdown p { margin-bottom: 12px; }
+
+    .note-markdown ul,
+    .note-markdown ol { padding-left: 22px; margin-bottom: 12px; }
+
+    .note-markdown li { margin-bottom: 6px; }
+
+    .note-markdown strong { color: var(--blue); font-weight: 700; }
+
+    .note-markdown code {
+      background: rgba(37,99,235,.08);
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-size: 13px;
+      font-family: 'Courier New', monospace;
+      color: var(--purple);
+      border: 1px solid rgba(37,99,235,.15);
+    }
+
+    .note-markdown pre {
+      background: var(--gray-900);
+      color: #e2e8f0;
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      margin: 14px 0;
+      font-size: 13px;
+      overflow-x: auto;
+      border: 1px solid var(--gray-800);
+    }
+
+    .note-markdown blockquote {
+      border-left: 3px solid var(--blue);
+      padding: 10px 16px;
+      background: rgba(37,99,235,.04);
+      border-radius: 0 8px 8px 0;
+      margin: 14px 0;
+      color: var(--gray-700);
+    }
+
+    /* ── KEY POINTS ──────────────────────────────── */
+    .keypoints-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .keypoint-item {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      transition: all .18s;
+    }
+
+    .keypoint-item:hover {
+      border-color: rgba(37,99,235,.2);
+      background: rgba(37,99,235,.03);
+      transform: translateX(2px);
+    }
+
+    .kp-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      box-shadow: 0 2px 8px rgba(37,99,235,.3);
+    }
+
+    .kp-text {
+      font-size: 14px;
+      color: var(--gray-800);
+      line-height: 1.7;
+      font-family: var(--font-tamil);
+    }
+
+    /* ── FLASHCARDS ──────────────────────────────── */
+    .flashcards-meta {
+      text-align: center;
+      font-size: 13px;
+      color: var(--gray-400);
+      margin-bottom: 16px;
+      padding: 8px;
+      background: var(--gray-50);
+      border-radius: var(--radius-sm);
+    }
+
+    .flashcards-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .flashcard {
+      perspective: 800px;
+      cursor: pointer;
+      height: 150px;
+    }
+
+    .flashcard-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform .5s cubic-bezier(.4, .2, .2, 1);
+    }
+
+    .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+
+    .flashcard-front,
+    .flashcard-back {
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius-md);
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .flashcard-front {
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(37,99,235,.3);
+    }
+
+    .flashcard-back {
+      background: #fff;
+      border: 1.5px solid var(--blue);
+      color: var(--gray-800);
+      transform: rotateY(180deg);
+      box-shadow: 0 4px 16px rgba(37,99,235,.1);
+    }
+
+    .fc-q {
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.5;
+      font-family: var(--font-tamil);
+    }
+
+    .fc-a {
+      font-size: 13px;
+      line-height: 1.6;
+      font-family: var(--font-tamil);
+      color: var(--gray-700);
+    }
+
+    .fc-tap {
+      font-size: 10px;
+      color: rgba(255,255,255,.65);
+      margin-top: 10px;
+      display: block;
+    }
+
+    /* ── MIND MAP ────────────────────────────────── */
+    .mindmap-container {
+      width: 100%;
+      min-height: 400px;
+      background: var(--gray-50);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--gray-200);
+      overflow: hidden;
+    }
+
+    .mindmap-svg { width: 100%; height: 420px; }
+
+    /* ── REVISION SHEET ──────────────────────────── */
+    .revision-section { margin-bottom: 24px; }
+
+    .revision-section:last-child { margin-bottom: 0; }
+
+    .revision-section-title {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .formula-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    .formula-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      background: rgba(37,99,235,.06);
+      border: 1px solid rgba(37,99,235,.18);
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: var(--blue);
+      font-weight: 700;
+      transition: all .18s;
+    }
+
+    .formula-chip:hover {
+      background: rgba(37,99,235,.12);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(37,99,235,.2);
+    }
+
+    .def-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .def-item {
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      font-size: 14px;
+      font-family: var(--font-tamil);
+      transition: all .18s;
+    }
+
+    .def-item:hover {
+      border-color: rgba(37,99,235,.2);
+      background: rgba(37,99,235,.02);
+    }
+
+    .def-term {
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 3px;
+    }
+
+    .def-meaning {
+      color: var(--gray-600);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .exam-tip-box {
+      padding: 16px 18px;
+      border-radius: var(--radius-md);
+      background: rgba(245,158,11,.06);
+      border: 1px solid rgba(245,158,11,.25);
+      font-size: 14px;
+      color: var(--gray-700);
+      font-family: var(--font-tamil);
+      line-height: 1.75;
+    }
+
+    .tip-highlight {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 700;
+      color: var(--amber);
+    }
+
+    /* ── NOTE FOOTER ─────────────────────────────── */
+    .note-footer {
+      padding: 12px 20px;
+      border-top: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      background: var(--gray-50);
+    }
+
+    .meta-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 99px;
+      background: var(--gray-200);
+      color: var(--gray-600);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .meta-pill.blue { background: rgba(37,99,235,.1); color: var(--blue); }
+    .meta-pill.purple { background: rgba(124,58,237,.1); color: var(--purple); }
+
+    .powered-by {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--gray-400);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* ─────────────────────────────────────────────
+       ANIMATIONS & UTILITIES
+    ───────────────────────────────────────────── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in { animation: fadeSlideUp .35s ease both; }
+
+    /* ─────────────────────────────────────────────
+       TOAST NOTIFICATIONS
+    ───────────────────────────────────────────── */
+    .toast-wrap {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast {
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: fadeSlideUp .3s ease both;
+      pointer-events: auto;
+      box-shadow: var(--shadow-lg);
+      min-width: 200px;
+    }
+
+    .toast.success { background: var(--green); }
+    .toast.error   { background: var(--red); }
+    .toast.info    { background: var(--blue); }
+
+    /* ─────────────────────────────────────────────
+       RESPONSIVE
+    ───────────────────────────────────────────── */
+    @media (max-width: 1060px) {
+      .notes-layout { grid-template-columns: 280px 1fr; }
+    }
+
+    @media (max-width: 900px) {
+      .notes-layout { grid-template-columns: 1fr; }
+      .flashcards-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+      .content { padding: 16px; }
+      .topbar { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─────────────────────────────────────────────
+     SIDEBAR
+───────────────────────────────────────────── -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-icon">த</div>
+    <span class="logo-text">Tamil<span>AI</span></span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <span class="nav-label">Main</span>
+    <a class="nav-item" href="dashboard.html">
+      <div class="nav-icon">🏠</div> Dashboard
+    </a>
+    <a class="nav-item" href="tutor.html">
+      <div class="nav-icon">🤖</div> AI Tutor
+    </a>
+    <a class="nav-item" href="voice.html">
+      <div class="nav-icon">🎤</div> Voice Tutor
+    </a>
+    <a class="nav-item" href="textbook.html">
+      <div class="nav-icon">📚</div> My Textbooks
+    </a>
+
+    <span class="nav-label">Learning</span>
+    <a class="nav-item" href="quiz.html">
+      <div class="nav-icon">❓</div> Quiz Generator
+    </a>
+    <a class="nav-item active">
+      <div class="nav-icon">📝</div> Notes AI
+    </a>
+    <a class="nav-item" href="planner.html">
+      <div class="nav-icon">📅</div> Study Planner
+    </a>
+
+    <span class="nav-label">Track</span>
+    <a class="nav-item" href="progress.html">
+      <div class="nav-icon">📈</div> My Progress
+    </a>
+    <a class="nav-item" href="achievements.html">
+      <div class="nav-icon">🏆</div> Leaderboard
+    </a>
+    <a class="nav-item" href="profile.html">
+      <div class="nav-icon">👤</div> Profile
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <button class="logout-btn" onclick="handleLogout()">
+      🚪 Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- ─────────────────────────────────────────────
+     MAIN
+───────────────────────────────────────────── -->
+<div class="main">
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title">📝 Notes AI</div>
+      <div class="topbar-sub">தமிழில் AI குறிப்புகள் தானாக உருவாகும்</div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-back" onclick="location.href='dashboard.html'">
+        &#8592; Dashboard
+      </button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+    <div class="notes-layout">
+
+      <!-- ─── LEFT: Setup Panel ─────────────────── -->
+      <div class="setup-panel">
+
+        <!-- Topic Details -->
+        <div class="panel-card">
+          <h3>📚 Topic Details</h3>
+
+          <div class="form-group">
+            <label class="form-label">Topic / Chapter *</label>
+            <input
+              class="form-input"
+              id="topicInput"
+              placeholder="e.g. ஒளிச்சேர்க்கை, DNA Structure, Newton Laws…"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Subject</label>
+            <div class="select-wrap">
+              <select class="form-select" id="subjectSelect">
+                <option value="Science">🔬 அறிவியல் (Science)</option>
+                <option value="Maths">📐 கணிதம் (Maths)</option>
+                <option value="Social">🌍 சமூகவியல் (Social)</option>
+                <option value="Tamil">📖 தமிழ் (Tamil)</option>
+                <option value="English">🔤 English</option>
+                <option value="Physics">⚛️ Physics</option>
+                <option value="Chemistry">🧪 Chemistry</option>
+                <option value="Biology">🧬 Biology</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Note Type -->
+        <div class="panel-card">
+          <h3>🎯 Note Type</h3>
+          <div class="type-list">
+
+            <div class="type-item selected" data-type="summary" onclick="selectType(this)">
+              <div class="type-icon-wrap">📄</div>
+              <div class="type-info">
+                <div class="type-name">Summary</div>
+                <div class="type-desc">Full explanation with headings</div>
+              </div>
+              <div class="type-check">✓</div>
+            </div>
+
+            <div class="type-item" data-type="keypoints" onclick="selectType(this)">
+              <div class="type-icon-wrap">🔑</div>
+              <div class="type-info">
+                <div class="type-name">Key Points</div>
+                <div class="type-desc">Numbered list with brief notes</div>
+              </div>
+              <div class="type-check">✓</div>
+            </div>
+
+            <div class="type-item" data-type="flashcards" onclick="selectType(this)">
+              <div class="type-icon-wrap">🃏</div>
+              <div class="type-info">
+                <div class="type-name">Flashcards</div>
+                <div class="type-desc">Tap-to-flip Q&amp;A cards</div>
+              </div>
+              <div class="type-check">✓</div>
+            </div>
+
+            <div class="type-item" data-type="mindmap" onclick="selectType(this)">
+              <div class="type-icon-wrap">🧠</div>
+              <div class="type-info">
+                <div class="type-name">Mind Map</div>
+                <div class="type-desc">Visual concept web</div>
+              </div>
+              <div class="type-check">✓</div>
+            </div>
+
+            <div class="type-item" data-type="revision" onclick="selectType(this)">
+              <div class="type-icon-wrap">⚡</div>
+              <div class="type-info">
+                <div class="type-name">Revision Sheet</div>
+                <div class="type-desc">Formulas, definitions &amp; tips</div>
+              </div>
+              <div class="type-check">✓</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Generate Button -->
+        <button type="button" class="generate-btn" id="generateBtn" onclick="generateNotes()">
+          <div class="btn-spinner" id="btnSpinner"></div>
+          <span class="btn-label">✨ Generate Notes</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+
+        <!-- My Saved Notes -->
+        <div class="panel-card">
+          <h3>🗂 My Saved Notes</h3>
+          <div class="note-list" id="savedNotesList">
+
+            <div class="note-item" onclick="loadDemoNote('photosynthesis')">
+              <span class="note-emoji">📄</span>
+              <div class="note-info">
+                <div class="note-title">ஒளிச்சேர்க்கை Summary</div>
+                <div class="note-meta">அறிவியல் · Summary · Today</div>
+              </div>
+              <span class="note-arrow">›</span>
+            </div>
+
+            <div class="note-item" onclick="loadDemoNote('newton')">
+              <span class="note-emoji">🔑</span>
+              <div class="note-info">
+                <div class="note-title">Newton's Laws Key Points</div>
+                <div class="note-meta">Physics · Key Points · Yesterday</div>
+              </div>
+              <span class="note-arrow">›</span>
+            </div>
+
+            <div class="note-item" onclick="loadDemoNote('algebra')">
+              <span class="note-emoji">🃏</span>
+              <div class="note-info">
+                <div class="note-title">Algebra Flashcards</div>
+                <div class="note-meta">Maths · Flashcards · 2 days ago</div>
+              </div>
+              <span class="note-arrow">›</span>
+            </div>
+
+          </div>
+        </div>
+
+      </div><!-- /setup-panel -->
+
+      <!-- ─── RIGHT: Output Panel ───────────────── -->
+      <div class="output-panel">
+
+        <!-- Empty State -->
+        <div class="output-empty" id="outputEmpty">
+          <div class="empty-illustration">📝</div>
+          <div class="empty-title">உங்கள் AI notes இங்கே தோன்றும்</div>
+          <div class="empty-sub">
+            தலைப்பை உள்ளிட்டு note வகையை தேர்ந்தெடுத்து Generate செய்யுங்கள்.
+            AI தமிழில் அழகான குறிப்புகளை உருவாக்கும்.
+          </div>
+          <div class="empty-chips">
+            <span class="empty-chip" onclick="quickStart('ஒளிச்சேர்க்கை','Science','summary')">🌿 ஒளிச்சேர்க்கை</span>
+            <span class="empty-chip" onclick="quickStart('Newton Laws','Physics','keypoints')">⚛️ Newton Laws</span>
+            <span class="empty-chip" onclick="quickStart('DNA Structure','Biology','flashcards')">🧬 DNA Structure</span>
+            <span class="empty-chip" onclick="quickStart('Algebra','Maths','revision')">📐 Algebra</span>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div class="output-loading" id="outputLoading">
+          <div class="load-animation">✨</div>
+          <div class="load-title">AI குறிப்புகள் உருவாக்குகிறது…</div>
+          <div class="load-sub">Generating Tamil notes with AI</div>
+          <div class="load-bar-wrap"><div class="load-bar"></div></div>
+        </div>
+
+        <!-- Note Output -->
+        <div class="note-output" id="noteOutput">
+
+          <div class="note-toolbar">
+            <div class="note-toolbar-title" id="noteTitle">Note Title</div>
+            <button class="toolbar-btn" onclick="copyNote()" title="Copy note text">
+              📋 Copy
+            </button>
+            <button class="toolbar-btn" onclick="shareNote()" title="Share this note">
+              🔗 Share
+            </button>
+            <button class="toolbar-btn primary" onclick="exportPDF()" title="Export as PDF">
+              ⬇️ Export PDF
+            </button>
+          </div>
+
+          <div class="note-tabs" id="noteTabs"></div>
+
+          <div class="note-body" id="noteBody"></div>
+
+          <div class="note-footer" id="noteFooter"></div>
+
+        </div><!-- /note-output -->
+
+      </div><!-- /output-panel -->
+
+    </div><!-- /notes-layout -->
+  </div><!-- /content -->
+
+</div><!-- /main -->
+
+<!-- Toast container -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ─────────────────────────────────────────────
+     SUPABASE (loaded first so auth check can use it)
+───────────────────────────────────────────── -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/logout.js"></script>
+
+<!-- ─────────────────────────────────────────────
+     AUTH GUARD
+───────────────────────────────────────────── -->
+<script>
+(async function checkAuth() {
+  try {
+    var result = await supabaseClient.auth.getSession();
+    if (!result.data.session) {
+      window.location.href = 'auth.html';
+    }
+  } catch (err) {
+    console.warn('Auth check error:', err);
+  }
+}());
+</script>
+
+<!-- ─────────────────────────────────────────────
+     MAIN APPLICATION JAVASCRIPT
+     All functions are defined here in one block.
+     No template literals used in HTML generation
+     to prevent parser issues.
+───────────────────────────────────────────── -->
+<script>
+/* global supabaseClient */
+
+var API = 'http://localhost:5000/api';
+var token = localStorage.getItem('tamilai_token');
+var currentType = 'summary';
+var currentNote = null;
+var currentTab  = 0;
+
+/* ══════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════ */
+
+function showPanel(id) {
+  var panels = ['outputEmpty', 'outputLoading', 'noteOutput'];
+  for (var i = 0; i < panels.length; i++) {
+    var el = document.getElementById(panels[i]);
+    if (!el) continue;
+    if (panels[i] === id) {
+      el.style.display = (panels[i] === 'noteOutput') ? 'flex' : 'block';
+    } else {
+      el.style.display = 'none';
+    }
+  }
+}
+
+function showToast(message, type) {
+  type = type || 'info';
+  var wrap  = document.getElementById('toastWrap');
+  var toast = document.createElement('div');
+  toast.className = 'toast ' + type;
+  var icons = { success: '✅', error: '❌', info: 'ℹ️' };
+  toast.innerHTML = (icons[type] || '') + ' ' + message;
+  wrap.appendChild(toast);
+  setTimeout(function () {
+    toast.style.opacity = '0';
+    toast.style.transition = 'opacity .3s';
+    setTimeout(function () { toast.remove(); }, 350);
+  }, 3000);
+}
+
+function handleLogout() {
+  if (typeof supabaseClient !== 'undefined') {
+    supabaseClient.auth.signOut().then(function () {
+      localStorage.clear();
+      window.location.href = 'auth.html';
+    });
+  } else {
+    localStorage.clear();
+    window.location.href = 'auth.html';
+  }
+}
+
+/* ══════════════════════════════════════════════
+   TYPE SELECTOR
+══════════════════════════════════════════════ */
+
+function selectType(el) {
+  var items = document.querySelectorAll('.type-item');
+  for (var i = 0; i < items.length; i++) {
+    items[i].classList.remove('selected');
+  }
+  el.classList.add('selected');
+  currentType = el.getAttribute('data-type');
+}
+
+/* ══════════════════════════════════════════════
+   QUICK START (from empty state chips)
+══════════════════════════════════════════════ */
+
+function quickStart(topic, subject, type) {
+  document.getElementById('topicInput').value = topic;
+
+  var sel = document.getElementById('subjectSelect');
+  for (var i = 0; i < sel.options.length; i++) {
+    if (sel.options[i].value === subject) { sel.selectedIndex = i; break; }
+  }
+
+  var items = document.querySelectorAll('.type-item');
+  for (var j = 0; j < items.length; j++) {
+    if (items[j].getAttribute('data-type') === type) {
+      selectType(items[j]);
+      break;
+    }
+  }
+
+  generateNotes();
+}
+
+/* ══════════════════════════════════════════════
+   GENERATE NOTES — Main Entry Point
+══════════════════════════════════════════════ */
+
+function generateNotes() {
+  var topicEl   = document.getElementById('topicInput');
+  var subjectEl = document.getElementById('subjectSelect');
+  var btn       = document.getElementById('generateBtn');
+
+  var topic   = topicEl.value.trim();
+  var subject = subjectEl.value;
+
+  if (!topic) {
+    topicEl.style.borderColor = 'var(--red)';
+    topicEl.style.boxShadow   = '0 0 0 3px rgba(239,68,68,.1)';
+    topicEl.focus();
+    setTimeout(function () {
+      topicEl.style.borderColor = '';
+      topicEl.style.boxShadow   = '';
+    }, 1800);
+    showToast('Topic / Chapter-ஐ உள்ளிடுங்கள்', 'error');
+    return;
+  }
+  console.log("Generate button clicked");
+
+var btn = document.getElementById("generateBtn");
+console.log(btn);
+
+  showPanel('outputLoading');
+  btn.disabled = true;
+  btn.classList.add('loading');
+
+  fetch(API + '/notes/generate', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + (token || '')
+    },
+    body: JSON.stringify({
+      topic:     topic,
+      subject:   subject,
+      note_type: currentType
+    })
+  })
+  .then(function (res) {
+    if (!res.ok) { throw new Error('API ' + res.status); }
+    return res.json();
+  })
+  .then(function (data) {
+
+    console.log("========== AI NOTE ==========");
+    console.log(data);
+    console.log("=============================");
+
+    renderNote(data.note || data, topic);
+
+})
+  .catch(function () {
+    /* Fallback to demo note when API is unavailable */
+    renderNote(getDemoNote(topic, subject, currentType), topic);
+  })
+  .finally(function () {
+    btn.disabled = false;
+    btn.classList.remove('loading');
+  });
+}
+
+/* ══════════════════════════════════════════════
+   DEMO NOTE DATA
+══════════════════════════════════════════════ */
+
+function getDemoNote(topic, subject, type) {
+  var contentMap = {
+    summary: [
+      '## ' + topic,
+      '',
+      '**வரையறை:**',
+      topic + ' என்பது Samacheer Kalvi பாடத்திட்டத்தில் முக்கிய இடம் பெற்றுள்ள ஒரு அறிவியல் கருத்தாகும்.',
+      '',
+      '## முக்கிய கொள்கைகள்',
+      '',
+      'ஒளிச்சேர்க்கை என்பது தாவரங்கள் **சூரிய ஒளி**, **நீர்** மற்றும் **கார்பன் டை ஆக்சைடு** பயன்படுத்தி உணவு தயாரிக்கும் செயல்முறை.',
+      '',
+      '**சமன்பாடு:**',
+      '`6CO₂ + 6H₂O + சூரிய ஒளி → C₆H₁₂O₆ + 6O₂`',
+      '',
+      '## செயல்முறை படிகள்',
+      '',
+      '1. **ஒளி உறிஞ்சல்** — குளோரோபில் சூரிய ஒளியை உறிஞ்சுகிறது',
+      '2. **நீரின் பகுப்பு** — H₂O → 2H⁺ + O²⁻',
+      '3. **கார்பன் ஒடுக்கம்** — CO₂ → குளுக்கோஸ்',
+      '',
+      '## நினைவில் வைக்கவும்',
+      '',
+      '> ஒளிச்சேர்க்கை = தாவரத்தின் சமையல்கூடம். சூரிய ஒளி = எரிவாயு. குளோரோபிளாஸ்ட் = அடுப்பு! 🌿'
+    ].join('\n'),
+
+    keypoints: JSON.stringify([
+      { point: 'ஒளிச்சேர்க்கை பச்சை தாவரங்களில் மட்டுமே நடைபெறுகிறது', detail: 'குளோரோபில் உள்ள செல்களில் மட்டும் சாத்தியம்' },
+      { point: 'குளோரோபிளாஸ்ட்டில் நடைபெறும் ஒரு உயிர்வேதியியல் செயல்முறை', detail: 'இலை செல்களில் உள்ள சிறப்பு உறுப்பு' },
+      { point: 'சூரிய ஒளி ஆற்றல் வேதி ஆற்றலாக மாற்றப்படுகிறது', detail: 'ATP மூலம் ஆற்றல் சேமிக்கப்படும்' },
+      { point: 'CO₂ உறிஞ்சி O₂ வெளியிடப்படும்', detail: 'நாம் மூச்சு விடும் ஆக்சிஜன் இதுவே' },
+      { point: 'குளுக்கோஸ் C₆H₁₂O₆ உருவாகும்', detail: 'தாவரத்தின் உணவு மற்றும் நமது சர்க்கரை மூலம்' }
+    ]),
+
+    flashcards: JSON.stringify([
+      { q: 'ஒளிச்சேர்க்கை என்றால் என்ன?', a: 'தாவரங்கள் சூரிய ஒளியை பயன்படுத்தி உணவு தயாரிக்கும் செயல்முறை' },
+      { q: 'ஒளிச்சேர்க்கை எங்கு நடைபெறுகிறது?', a: 'குளோரோபிளாஸ்ட்டில் (Chloroplast)' },
+      { q: 'ஒளிச்சேர்க்கையின் சமன்பாடு என்ன?', a: '6CO₂ + 6H₂O + ஒளி → C₆H₁₂O₆ + 6O₂' },
+      { q: 'குளோரோபில் என்றால் என்ன?', a: 'தாவரங்களில் உள்ள பச்சை நிற நிறமி — ஒளியை உறிஞ்சும்' },
+      { q: 'ஒளிச்சேர்க்கையில் வெளியிடும் வாயு எது?', a: 'ஆக்சிஜன் (O₂)' },
+      { q: 'ஒளிச்சேர்க்கை மூலம் உருவாகும் உணவு என்ன?', a: 'குளுக்கோஸ் (C₆H₁₂O₆)' }
+    ]),
+
+    mindmap: JSON.stringify({
+      center: topic,
+      branches: [
+        { label: 'இடம்',           color: '#2563EB', children: ['குளோரோபிளாஸ்ட்', 'இலை செல்கள்', 'பச்சை பாகங்கள்'] },
+        { label: 'தேவையானவை',     color: '#7C3AED', children: ['சூரிய ஒளி', 'நீர் (H₂O)', 'CO₂'] },
+        { label: 'உற்பத்தி',       color: '#10B981', children: ['குளுக்கோஸ்', 'ஆக்சிஜன்', 'ATP'] },
+        { label: 'முக்கியத்துவம்', color: '#F59E0B', children: ['உணவு சங்கிலி', 'O₂ வழங்கல்', 'கார்பன் சுழற்சி'] }
+      ]
+    }),
+
+    revision: JSON.stringify({
+      formulas: [
+        '6CO₂ + 6H₂O + ஒளி → C₆H₁₂O₆ + 6O₂',
+        'குளோரோபில் + ஒளி → ATP (ஆற்றல்)'
+      ],
+      definitions: [
+        { term: 'ஒளிச்சேர்க்கை',  meaning: 'சூரிய ஒளியை வேதி ஆற்றலாக மாற்றும் செயல்முறை' },
+        { term: 'குளோரோபில்',      meaning: 'சூரிய ஒளியை உறிஞ்சும் பச்சை நிற நிறமி' },
+        { term: 'குளோரோபிளாஸ்ட்', meaning: 'ஒளிச்சேர்க்கை நடைபெறும் செல் உறுப்பு' },
+        { term: 'குளுக்கோஸ்',      meaning: 'ஒளிச்சேர்க்கை மூலம் உருவாகும் சர்க்கரை' }
+      ],
+      exam_tips: '📌 சமன்பாடை மனப்பாடம் செய்யுங்கள். குளோரோபிளாஸ்ட்டில் நடைபெறுகிறது என்று எழுதுங்கள். Light Reaction மற்றும் Dark Reaction வேறுபாடுகளை அட்டவணையில் எழுதுங்கள்.'
+    })
+  };
+
+  var noteTitles = {
+    summary:    topic + ' - விரிவான சுருக்கம்',
+    keypoints:  topic + ' - முக்கிய புள்ளிகள்',
+    flashcards: topic + ' - Flash Cards',
+    mindmap:    topic + ' - Mind Map',
+    revision:   topic + ' - Revision Sheet'
+  };
+
+  var keyTermsMap = {
+    summary:    ['குளோரோபில்', 'குளோரோபிளாஸ்ட்', 'குளுக்கோஸ்', 'ஆக்சிஜன்'],
+    keypoints:  ['குளோரோபில்', 'ATP', 'CO₂', 'O₂'],
+    flashcards: [],
+    mindmap:    [],
+    revision:   ['குளோரோபில்', 'ATP', 'ADP', 'NADPH']
+  };
+
+  var formulasMap = {
+    summary:    ['6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂'],
+    keypoints:  ['6CO₂ + 6H₂O + ஒளி → C₆H₁₂O₆ + 6O₂'],
+    flashcards: [],
+    mindmap:    [],
+    revision:   ['6CO₂ + 6H₂O + ஒளி → C₆H₁₂O₆ + 6O₂']
+  };
+
+  var tipsMap = {
+    summary:    'சமன்பாடை மனப்பாடம் செய்யுங்கள். குளோரோபிளாஸ்ட்டில் நடைபெறுகிறது என்பதை மறக்காதீர்கள்.',
+    keypoints:  '5 முக்கிய புள்ளிகளை மனப்பாடம் செய்யுங்கள்.',
+    flashcards: '',
+    mindmap:    '',
+    revision:   'Light Reaction மற்றும் Dark Reaction வேறுபாடுகளை அட்டவணையில் எழுதுங்கள்.'
+  };
+
+  var safeType = contentMap[type] ? type : 'summary';
+
+  return {
+    title:              noteTitles[safeType],
+    type:               safeType,
+    subject:            subject,
+    content:            contentMap[safeType],
+    key_terms:          keyTermsMap[safeType],
+    important_formulas: formulasMap[safeType],
+    exam_tips:          tipsMap[safeType]
+  };
+}
+
+/* ══════════════════════════════════════════════
+   RENDER NOTE
+══════════════════════════════════════════════ */
+
+function renderNote(note, topicFallback) {
+  currentNote = note;
+  showPanel('noteOutput');
+
+  var emojiMap = { summary: '📄', keypoints: '🔑', flashcards: '🃏', mindmap: '🧠', revision: '⚡' };
+  var noteType = note.type || 'note';
+
+  document.getElementById('noteTitle').textContent = note.title || topicFallback || 'Note';
+
+  /* Build tabs */
+  var tabs = [{ label: '📄 Note', idx: 0 }];
+  if (note.key_terms && note.key_terms.length > 0)
+    tabs.push({ label: '🔑 Key Terms', idx: 1 });
+  if (note.important_formulas && note.important_formulas.length > 0)
+    tabs.push({ label: '📐 Formulas', idx: 2 });
+  if (note.exam_tips)
+    tabs.push({ label: '💡 Exam Tips', idx: 3 });
+
+  var tabEl = document.getElementById('noteTabs');
+  tabEl.innerHTML = '';
+  for (var i = 0; i < tabs.length; i++) {
+    var t  = tabs[i];
+    var td = document.createElement('div');
+    td.className = 'note-tab' + (i === 0 ? ' active' : '');
+    td.textContent = t.label;
+    td.setAttribute('data-tab-idx', t.idx);
+    td.onclick = (function (tabIdx, el) {
+      return function () { switchTab(tabIdx, el); };
+    })(t.idx, td);
+    tabEl.appendChild(td);
+  }
+
+  renderTab(0, note);
+
+  /* Footer */
+  var timeStr = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+  var footerEl = document.getElementById('noteFooter');
+  footerEl.innerHTML = '';
+
+  var pill1 = document.createElement('span');
+  pill1.className = 'meta-pill blue';
+  pill1.textContent = (emojiMap[noteType] || '📝') + ' ' + noteType.charAt(0).toUpperCase() + noteType.slice(1);
+  footerEl.appendChild(pill1);
+
+  var pill2 = document.createElement('span');
+  pill2.className = 'meta-pill purple';
+  pill2.textContent = '📚 ' + (note.subject || 'Science');
+  footerEl.appendChild(pill2);
+
+  var pill3 = document.createElement('span');
+  pill3.className = 'meta-pill';
+  pill3.textContent = '🕐 ' + timeStr;
+  footerEl.appendChild(pill3);
+
+  var pw = document.createElement('span');
+  pw.className = 'powered-by';
+  pw.textContent = '⚡ Powered by Google Gemini';
+  footerEl.appendChild(pw);
+}
+
+/* ══════════════════════════════════════════════
+   TAB SWITCHING
+══════════════════════════════════════════════ */
+
+function switchTab(idx, clickedEl) {
+  var tabs = document.querySelectorAll('.note-tab');
+  for (var i = 0; i < tabs.length; i++) {
+    tabs[i].classList.remove('active');
+  }
+  if (clickedEl) clickedEl.classList.add('active');
+  currentTab = idx;
+  renderTab(idx, currentNote);
+}
+
+function renderTab(idx, note) {
+  var body = document.getElementById('noteBody');
+  body.innerHTML = '';
+
+  if (idx === 0) {
+    renderMainContent(note, body);
+
+  } else if (idx === 1) {
+    /* Key Terms */
+    if (note.key_terms && note.key_terms.length) {
+      var wrap = document.createElement('div');
+      wrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:10px;';
+      for (var i = 0; i < note.key_terms.length; i++) {
+        var chip = document.createElement('span');
+        chip.style.cssText = 'padding:8px 16px;border-radius:99px;background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.2);color:var(--blue);font-size:14px;font-weight:600;font-family:var(--font-tamil)';
+        chip.textContent = note.key_terms[i];
+        wrap.appendChild(chip);
+      }
+      body.appendChild(wrap);
+    }
+
+  } else if (idx === 2) {
+    /* Formulas */
+    if (note.important_formulas && note.important_formulas.length) {
+      var fgrid = document.createElement('div');
+      fgrid.className = 'formula-grid';
+      for (var fi = 0; fi < note.important_formulas.length; fi++) {
+        var fchip = document.createElement('span');
+        fchip.className = 'formula-chip';
+        fchip.textContent = '📐 ' + note.important_formulas[fi];
+        fgrid.appendChild(fchip);
+      }
+      body.appendChild(fgrid);
+    }
+
+  } else if (idx === 3) {
+    /* Exam Tips */
+    if (note.exam_tips) {
+      var tipBox = document.createElement('div');
+      tipBox.className = 'exam-tip-box';
+      tipBox.innerHTML = '<span class="tip-highlight">💡 Exam Tips:</span><br/><br/>' + escHtml(note.exam_tips);
+      body.appendChild(tipBox);
+    }
+  }
+}
+
+/* ══════════════════════════════════════════════
+   MAIN CONTENT RENDERER
+══════════════════════════════════════════════ */
+
+function renderMainContent(note, body) {
+  var type = note.type || 'summary';
+  var raw  = note.content || '';
+
+  body.classList.add('fade-in');
+  setTimeout(function () { body.classList.remove('fade-in'); }, 400);
+
+  if (type === 'summary') {
+    var md = document.createElement('div');
+    md.className = 'note-markdown';
+    md.innerHTML = formatMD(raw);
+    body.appendChild(md);
+
+  } else if (type === 'keypoints') {
+    var points = [];
+    try { points = JSON.parse(raw); }
+    catch (e) { points = [{ point: raw, detail: '' }]; }
+
+    var kpList = document.createElement('div');
+    kpList.className = 'keypoints-list';
+    for (var i = 0; i < points.length; i++) {
+      var p    = points[i];
+      var item = document.createElement('div');
+      item.className = 'keypoint-item';
+
+      var num  = document.createElement('div');
+      num.className = 'kp-num';
+      num.textContent = i + 1;
+
+      var txt  = document.createElement('div');
+      txt.className = 'kp-text';
+
+      var strong = document.createElement('strong');
+      strong.textContent = p.point || p;
+      txt.appendChild(strong);
+
+      if (p.detail) {
+        var detail = document.createElement('span');
+        detail.style.cssText = 'display:block;color:var(--gray-500);font-size:13px;margin-top:3px';
+        detail.textContent = p.detail;
+        txt.appendChild(detail);
+      }
+
+      item.appendChild(num);
+      item.appendChild(txt);
+      kpList.appendChild(item);
+    }
+    body.appendChild(kpList);
+
+  } else if (type === 'flashcards') {
+    var cards = [];
+    try { cards = JSON.parse(raw); }
+    catch (e) { cards = []; }
+
+    var meta = document.createElement('div');
+    meta.className = 'flashcards-meta';
+    meta.textContent = '🃏 Tap a card to reveal the answer · ' + cards.length + ' cards';
+    body.appendChild(meta);
+
+    var grid = document.createElement('div');
+    grid.className = 'flashcards-grid';
+
+    for (var ci = 0; ci < cards.length; ci++) {
+      var c = cards[ci];
+      var card = document.createElement('div');
+      card.className = 'flashcard';
+      card.onclick = (function (el) {
+        return function () { el.classList.toggle('flipped'); };
+      })(card);
+
+      var inner = document.createElement('div');
+      inner.className = 'flashcard-inner';
+
+      var front = document.createElement('div');
+      front.className = 'flashcard-front';
+      var qDiv = document.createElement('div');
+      var qText = document.createElement('div');
+      qText.className = 'fc-q';
+      qText.textContent = c.q || c.question || '';
+      var tapHint = document.createElement('div');
+      tapHint.className = 'fc-tap';
+      tapHint.textContent = 'Tap to reveal →';
+      qDiv.appendChild(qText);
+      qDiv.appendChild(tapHint);
+      front.appendChild(qDiv);
+
+      var back = document.createElement('div');
+      back.className = 'flashcard-back';
+      var aDiv = document.createElement('div');
+      aDiv.className = 'fc-a';
+      aDiv.textContent = c.a || c.answer || '';
+      back.appendChild(aDiv);
+
+      inner.appendChild(front);
+      inner.appendChild(back);
+      card.appendChild(inner);
+      grid.appendChild(card);
+    }
+    body.appendChild(grid);
+
+  } else if (type === 'mindmap') {
+    var mm = {};
+    try { mm = JSON.parse(raw); }
+    catch (e) { mm = { center: note.title || 'Topic', branches: [] }; }
+    renderMindMap(mm, body);
+
+  } else if (type === 'revision') {
+    var rv = {};
+    try { rv = JSON.parse(raw); }
+    catch (e) { rv = {}; }
+    renderRevision(rv, body);
+  }
+}
+
+/* ══════════════════════════════════════════════
+   MIND MAP RENDERER
+══════════════════════════════════════════════ */
+
+function renderMindMap(mm, body) {
+  var W = 700, H = 420;
+  var cx = W / 2, cy = H / 2, r = 62;
+  var branches  = mm.branches || [];
+  var branchLen = branches.length || 1;
+  var angleStep = (Math.PI * 2) / branchLen;
+  var branchR   = 155;
+
+  var ns  = 'http://www.w3.org/2000/svg';
+  var svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+  svg.setAttribute('class', 'mindmap-svg');
+  svg.style.fontFamily = 'var(--font-tamil)';
+
+  /* Gradient def */
+  var defs  = document.createElementNS(ns, 'defs');
+  var grad  = document.createElementNS(ns, 'radialGradient');
+  grad.id   = 'cg_' + Date.now();
+  var s1    = document.createElementNS(ns, 'stop');
+  s1.setAttribute('offset', '0%');
+  s1.setAttribute('stop-color', '#3B82F6');
+  var s2    = document.createElementNS(ns, 'stop');
+  s2.setAttribute('offset', '100%');
+  s2.setAttribute('stop-color', '#7C3AED');
+  grad.appendChild(s1);
+  grad.appendChild(s2);
+  defs.appendChild(grad);
+  svg.appendChild(defs);
+
+  /* Center circle */
+  var circle = document.createElementNS(ns, 'circle');
+  circle.setAttribute('cx', cx);
+  circle.setAttribute('cy', cy);
+  circle.setAttribute('r',  r);
+  circle.setAttribute('fill', 'url(#' + grad.id + ')');
+  circle.setAttribute('opacity', '.95');
+  svg.appendChild(circle);
+
+  var centerText = document.createElementNS(ns, 'text');
+  centerText.setAttribute('x', cx);
+  centerText.setAttribute('y', cy);
+  centerText.setAttribute('text-anchor', 'middle');
+  centerText.setAttribute('dominant-baseline', 'middle');
+  centerText.setAttribute('fill', 'white');
+  centerText.setAttribute('font-size', '13');
+  centerText.setAttribute('font-weight', '700');
+  centerText.textContent = mm.center || 'Topic';
+  svg.appendChild(centerText);
+
+  /* Branches */
+  for (var bi = 0; bi < branches.length; bi++) {
+    var b     = branches[bi];
+    var angle = bi * angleStep - Math.PI / 2;
+    var bx    = cx + Math.cos(angle) * branchR;
+    var by    = cy + Math.sin(angle) * branchR;
+
+    var line = document.createElementNS(ns, 'line');
+    line.setAttribute('x1', cx + Math.cos(angle) * r);
+    line.setAttribute('y1', cy + Math.sin(angle) * r);
+    line.setAttribute('x2', bx);
+    line.setAttribute('y2', by);
+    line.setAttribute('stroke', b.color);
+    line.setAttribute('stroke-width', '2.5');
+    line.setAttribute('opacity', '.65');
+    svg.appendChild(line);
+
+    var bCircle = document.createElementNS(ns, 'circle');
+    bCircle.setAttribute('cx', bx);
+    bCircle.setAttribute('cy', by);
+    bCircle.setAttribute('r',  '36');
+    bCircle.setAttribute('fill', b.color);
+    bCircle.setAttribute('opacity', '.13');
+    bCircle.setAttribute('stroke', b.color);
+    bCircle.setAttribute('stroke-width', '1.5');
+    svg.appendChild(bCircle);
+
+    var bText = document.createElementNS(ns, 'text');
+    bText.setAttribute('x', bx);
+    bText.setAttribute('y', by);
+    bText.setAttribute('text-anchor', 'middle');
+    bText.setAttribute('dominant-baseline', 'middle');
+    bText.setAttribute('fill', b.color);
+    bText.setAttribute('font-size', '12');
+    bText.setAttribute('font-weight', '700');
+    bText.textContent = b.label;
+    svg.appendChild(bText);
+
+    var children = b.children || [];
+    for (var ki = 0; ki < children.length; ki++) {
+      var childAngle = angle + (ki - (children.length - 1) / 2) * 0.46;
+      var childR     = branchR + 92;
+      var chx = cx + Math.cos(childAngle) * childR;
+      var chy = cy + Math.sin(childAngle) * childR;
+
+      var cLine = document.createElementNS(ns, 'line');
+      cLine.setAttribute('x1', bx);
+      cLine.setAttribute('y1', by);
+      cLine.setAttribute('x2', chx);
+      cLine.setAttribute('y2', chy);
+      cLine.setAttribute('stroke', b.color);
+      cLine.setAttribute('stroke-width', '1.5');
+      cLine.setAttribute('opacity', '.4');
+      cLine.setAttribute('stroke-dasharray', '4');
+      svg.appendChild(cLine);
+
+      var cText = document.createElementNS(ns, 'text');
+      cText.setAttribute('x', chx);
+      cText.setAttribute('y', chy);
+      cText.setAttribute('text-anchor', 'middle');
+      cText.setAttribute('dominant-baseline', 'middle');
+      cText.setAttribute('fill', b.color);
+      cText.setAttribute('font-size', '11');
+      cText.setAttribute('opacity', '.85');
+      cText.textContent = children[ki];
+      svg.appendChild(cText);
+    }
+  }
+
+  var container = document.createElement('div');
+  container.className = 'mindmap-container';
+  container.appendChild(svg);
+  body.appendChild(container);
+}
+
+/* ══════════════════════════════════════════════
+   REVISION SHEET RENDERER
+══════════════════════════════════════════════ */
+
+function renderRevision(rv, body) {
+  var formulas = rv.formulas    || [];
+  var defs     = rv.definitions || [];
+  var tip      = rv.exam_tips   || '';
+
+  if (formulas.length) {
+    var sec = document.createElement('div');
+    sec.className = 'revision-section';
+
+    var title = document.createElement('div');
+    title.className = 'revision-section-title';
+    title.textContent = '📐 சூத்திரங்கள் (Formulas)';
+    sec.appendChild(title);
+
+    var fg = document.createElement('div');
+    fg.className = 'formula-grid';
+    for (var fi = 0; fi < formulas.length; fi++) {
+      var chip = document.createElement('span');
+      chip.className = 'formula-chip';
+      chip.textContent = formulas[fi];
+      fg.appendChild(chip);
+    }
+    sec.appendChild(fg);
+    body.appendChild(sec);
+  }
+
+  if (defs.length) {
+    var defSec = document.createElement('div');
+    defSec.className = 'revision-section';
+
+    var defTitle = document.createElement('div');
+    defTitle.className = 'revision-section-title';
+    defTitle.textContent = '📖 வரையறைகள் (Definitions)';
+    defSec.appendChild(defTitle);
+
+    var defList = document.createElement('div');
+    defList.className = 'def-list';
+    for (var di = 0; di < defs.length; di++) {
+      var d    = defs[di];
+      var item = document.createElement('div');
+      item.className = 'def-item';
+
+      var term = document.createElement('div');
+      term.className = 'def-term';
+      term.textContent = d.term;
+
+      var meaning = document.createElement('div');
+      meaning.className = 'def-meaning';
+      meaning.textContent = d.meaning;
+
+      item.appendChild(term);
+      item.appendChild(meaning);
+      defList.appendChild(item);
+    }
+    defSec.appendChild(defList);
+    body.appendChild(defSec);
+  }
+
+  if (tip) {
+    var tipSec = document.createElement('div');
+    tipSec.className = 'revision-section';
+
+    var tipTitle = document.createElement('div');
+    tipTitle.className = 'revision-section-title';
+    tipTitle.textContent = '💡 தேர்வு குறிப்புகள் (Exam Tips)';
+    tipSec.appendChild(tipTitle);
+
+    var tipBox = document.createElement('div');
+    tipBox.className = 'exam-tip-box';
+    tipBox.textContent = tip;
+    tipSec.appendChild(tipBox);
+    body.appendChild(tipSec);
+  }
+}
+
+/* ══════════════════════════════════════════════
+   MARKDOWN FORMATTER
+══════════════════════════════════════════════ */
+
+function formatMD(text) {
+  if (!text) return '';
+  var escaped = text
+    /* Headings */
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    /* Bold */
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    /* Inline code */
+    .replace(/`([^`\n]+)`/g, '<code>$1</code>')
+    /* Blockquote */
+    .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+    /* Ordered list items */
+    .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
+    /* Unordered list items */
+    .replace(/^[-*] (.+)$/gm, '<li>$1</li>')
+    /* Paragraph breaks */
+    .replace(/\n\n/g, '</p><p>')
+    /* Single line breaks */
+    .replace(/\n/g, '<br/>');
+
+  return '<p>' + escaped + '</p>';
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/* ══════════════════════════════════════════════
+   LOAD DEMO NOTE
+══════════════════════════════════════════════ */
+
+function loadDemoNote(key) {
+  var mapTopic = { photosynthesis: 'ஒளிச்சேர்க்கை', newton: 'Newton Laws', algebra: 'Algebra' };
+  var mapType  = { photosynthesis: 'summary', newton: 'keypoints', algebra: 'flashcards' };
+
+  var topic = mapTopic[key] || key;
+  var type  = mapType[key]  || 'summary';
+
+  document.getElementById('topicInput').value = topic;
+
+  var items = document.querySelectorAll('.type-item');
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].getAttribute('data-type') === type) {
+      selectType(items[i]);
+      break;
+    }
+  }
+
+  var note = getDemoNote(topic, 'Science', type);
+  renderNote(note, topic);
+}
+
+/* ══════════════════════════════════════════════
+   COPY NOTE
+══════════════════════════════════════════════ */
+
+function copyNote() {
+  if (!currentNote) {
+    showToast('No note to copy. Generate a note first!', 'error');
+    return;
+  }
+  var bodyEl = document.getElementById('noteBody');
+  var text   = bodyEl ? (bodyEl.innerText || '') : '';
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text)
+      .then(function () { showToast('Note copied to clipboard!', 'success'); })
+      .catch(function () { fallbackCopy(text); });
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text) {
+  var ta        = document.createElement('textarea');
+  ta.value      = text;
+  ta.style.cssText = 'position:fixed;top:-999px;left:-999px;opacity:0';
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+    showToast('Note copied!', 'success');
+  } catch (e) {
+    showToast('Copy failed. Please select and copy manually.', 'error');
+  }
+  document.body.removeChild(ta);
+}
+
+/* ══════════════════════════════════════════════
+   SHARE NOTE
+══════════════════════════════════════════════ */
+
+function shareNote() {
+  if (!currentNote) {
+    showToast('Generate a note first before sharing.', 'error');
+    return;
+  }
+  var title  = currentNote.title || 'TamilAI Note';
+  var bodyEl = document.getElementById('noteBody');
+  var text   = bodyEl ? (bodyEl.innerText || '') : '';
+
+  if (navigator.share) {
+    navigator.share({ title: title, text: text }).catch(function () {});
+  } else {
+    showToast('Use Export PDF to save and share this note.', 'info');
+  }
+}
+
+/* ══════════════════════════════════════════════
+   EXPORT PDF
+   Uses DOM manipulation exclusively — no
+   template literals or string concatenation
+   that could leak into the HTML parser.
+══════════════════════════════════════════════ */
+
+
+</script>
+
+</body>
+</html>

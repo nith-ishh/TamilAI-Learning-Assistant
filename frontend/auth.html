@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TamilAI – Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #2563EB; --blue-dark: #1D4ED8;
+      --purple: #7C3AED; --purple-light: #8B5CF6;
+      --cyan: #06B6D4;
+      --gray-50: #F8FAFC; --gray-100: #F1F5F9; --gray-200: #E2E8F0;
+      --gray-400: #94A3B8; --gray-500: #64748B; --gray-600: #475569;
+      --gray-700: #334155; --gray-800: #1E293B; --gray-900: #0F172A;
+      --white: #FFFFFF;
+      --error: #EF4444;
+      --success: #10B981;
+      --font: 'Inter', sans-serif;
+      --font-tamil: 'Noto Sans Tamil', 'Inter', sans-serif;
+    }
+
+    html { height: 100%; }
+
+    body {
+      font-family: var(--font);
+      background: var(--gray-50);
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── LEFT PANEL ──────────────────────────────────────── */
+    .left-panel {
+      background: linear-gradient(150deg, var(--blue) 0%, var(--purple) 60%, #4C1D95 100%);
+      display: flex; flex-direction: column;
+      justify-content: space-between; padding: 48px;
+      position: relative; overflow: hidden;
+    }
+
+    .left-panel::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 60% at 20% 20%, rgba(255,255,255,.1) 0%, transparent 50%),
+        radial-gradient(ellipse 40% 40% at 80% 80%, rgba(6,182,212,.2) 0%, transparent 50%);
+    }
+
+    .left-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    .left-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; position: relative; z-index: 1;
+    }
+    .logo-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; color: white; font-weight: 800;
+      font-family: var(--font-tamil);
+    }
+    .logo-text { font-size: 20px; font-weight: 700; color: white; letter-spacing: -0.3px; }
+    .logo-text span { color: var(--cyan); }
+
+    .left-content {
+      position: relative; z-index: 1;
+    }
+    .left-content h2 {
+      font-size: 36px; font-weight: 800; color: white;
+      line-height: 1.2; letter-spacing: -1px; margin-bottom: 16px;
+    }
+    .left-content h2 .tamil {
+      display: block; font-family: var(--font-tamil);
+      font-size: 28px; color: rgba(255,255,255,.8);
+    }
+    .left-content p {
+      font-size: 16px; color: rgba(255,255,255,.7); line-height: 1.7;
+      margin-bottom: 36px;
+    }
+
+    .left-features {
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .left-feat {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 14px; color: rgba(255,255,255,.85); font-weight: 500;
+    }
+    .feat-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+
+    .left-bottom {
+      position: relative; z-index: 1;
+    }
+    .testimonial-card {
+      background: rgba(255,255,255,.1); backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 16px; padding: 20px;
+    }
+    .testi-quote {
+      font-size: 14px; color: rgba(255,255,255,.9);
+      line-height: 1.7; margin-bottom: 14px; font-style: italic;
+      font-family: var(--font-tamil);
+    }
+    .testi-author-row { display: flex; align-items: center; gap: 10px; }
+    .testi-av {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--cyan), white);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: var(--blue);
+    }
+    .testi-name-sm { font-size: 13px; font-weight: 700; color: white; }
+    .testi-role-sm { font-size: 12px; color: rgba(255,255,255,.6); }
+    .stars { color: #FCD34D; font-size: 12px; margin-top: 2px; }
+
+    /* ─── RIGHT PANEL ─────────────────────────────────────── */
+    .right-panel {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 48px 40px;
+      overflow-y: auto;
+    }
+
+    .auth-box { width: 100%; max-width: 420px; }
+
+    .auth-tabs {
+      display: flex; background: var(--gray-100); border-radius: 10px;
+      padding: 4px; margin-bottom: 32px;
+    }
+    .auth-tab {
+      flex: 1; padding: 10px; text-align: center;
+      font-size: 14px; font-weight: 600; color: var(--gray-500);
+      cursor: pointer; border-radius: 8px;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    }
+    .auth-tab.active {
+      background: white; color: var(--gray-900);
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+
+    .auth-heading { font-size: 26px; font-weight: 800; color: var(--gray-900); margin-bottom: 6px; letter-spacing: -0.5px; }
+    .auth-sub { font-size: 14px; color: var(--gray-500); margin-bottom: 28px; }
+
+    /* ─── FORM ────────────────────────────────────────────── */
+    .form-group { margin-bottom: 18px; }
+    .form-label {
+      display: block; font-size: 13px; font-weight: 600;
+      color: var(--gray-700); margin-bottom: 6px;
+    }
+    .form-input {
+      width: 100%; padding: 11px 14px;
+      border: 1.5px solid var(--gray-200); border-radius: 10px;
+      font-size: 14px; font-family: var(--font);
+      color: var(--gray-800); background: white;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    .form-input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+    }
+    .form-input.error { border-color: var(--error); }
+    .form-input.error:focus { box-shadow: 0 0 0 3px rgba(239,68,68,.1); }
+
+    .input-wrapper { position: relative; }
+    .input-icon {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      color: var(--gray-400); font-size: 16px; pointer-events: none;
+    }
+    .input-wrapper .form-input { padding-left: 40px; }
+    .input-toggle {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      color: var(--gray-400); cursor: pointer; font-size: 14px;
+      background: none; border: none; padding: 4px;
+    }
+    .input-toggle:hover { color: var(--gray-600); }
+
+    .field-error {
+      font-size: 12px; color: var(--error); margin-top: 5px;
+      display: none;
+    }
+    .field-error.show { display: block; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    /* Role selector */
+    .role-selector {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    }
+    .role-opt {
+      border: 1.5px solid var(--gray-200); border-radius: 10px;
+      padding: 12px 8px; text-align: center; cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .role-opt:hover { border-color: var(--blue); background: rgba(37,99,235,.03); }
+    .role-opt.selected { border-color: var(--blue); background: rgba(37,99,235,.06); }
+    .role-opt input { display: none; }
+    .role-emoji { font-size: 22px; display: block; margin-bottom: 4px; }
+    .role-name { font-size: 12px; font-weight: 600; color: var(--gray-700); }
+
+    /* General error banner */
+    .error-banner {
+      background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.2);
+      border-radius: 10px; padding: 12px 16px;
+      font-size: 14px; color: #DC2626;
+      display: none; margin-bottom: 18px;
+    }
+    .error-banner.show { display: block; }
+
+    /* Submit button */
+    .btn-submit {
+      width: 100%; padding: 13px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: white; border: none; border-radius: 10px;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 16px rgba(37,99,235,.3);
+      margin-top: 8px;
+    }
+    .btn-submit:hover { opacity: 0.92; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(37,99,235,.4); }
+    .btn-submit:active { transform: translateY(0); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .spinner {
+      width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.4);
+      border-top-color: white; border-radius: 50%;
+      animation: spin 0.7s linear infinite; display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 20px 0; font-size: 12px; color: var(--gray-400);
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--gray-200);
+    }
+
+    .btn-google {
+      width: 100%; padding: 12px;
+      background: white; border: 1.5px solid var(--gray-200);
+      border-radius: 10px; font-size: 14px; font-weight: 600;
+      color: var(--gray-700); cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+    .btn-google:hover { border-color: var(--gray-300); box-shadow: 0 2px 8px rgba(0,0,0,.06); background: var(--gray-50); }
+
+    .forgot-link {
+      font-size: 13px; color: var(--blue); font-weight: 600;
+      text-decoration: none; float: right; margin-bottom: 4px;
+      transition: opacity 0.2s;
+    }
+    .forgot-link:hover { opacity: 0.75; }
+
+    .terms {
+      font-size: 12px; color: var(--gray-400); text-align: center;
+      margin-top: 16px; line-height: 1.6;
+    }
+    .terms a { color: var(--blue); text-decoration: none; }
+
+    .switch-mode {
+      font-size: 14px; color: var(--gray-500); text-align: center;
+      margin-top: 24px;
+    }
+    .switch-mode a { color: var(--blue); font-weight: 600; text-decoration: none; cursor: pointer; }
+
+    /* Password strength */
+    .pwd-strength { margin-top: 8px; }
+    .strength-bar {
+      height: 4px; border-radius: 99px; background: var(--gray-200);
+      overflow: hidden; margin-bottom: 4px;
+    }
+    .strength-fill { height: 100%; border-radius: 99px; transition: width 0.3s, background 0.3s; width: 0; }
+    .strength-label { font-size: 11px; color: var(--gray-400); }
+
+    /* Success state */
+    .success-screen {
+      display: none; text-align: center; padding: 20px 0;
+    }
+    .success-icon {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: rgba(16,185,129,.1); border: 2px solid rgba(16,185,129,.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; margin: 0 auto 16px;
+    }
+
+    /* Page transitions */
+    .form-panel {
+      animation: fadeSlide 0.3s ease both;
+    }
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateX(12px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      body { grid-template-columns: 1fr; }
+      .left-panel { display: none; }
+      .right-panel { padding: 40px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── LEFT PANEL ─────────────────────────────────────── -->
+  <div class="left-panel">
+    <div class="left-grid"></div>
+
+    <a class="left-logo" href="index.html">
+      <div class="logo-icon">த</div>
+      <div class="logo-text">Tamil<span>AI</span></div>
+    </a>
+
+    <div class="left-content">
+      <h2>
+        உங்கள் AI ஆசிரியர்
+        <span class="tamil">எப்போதும் உங்களுடன்.</span>
+      </h2>
+      <p>Join thousands of Tamil students learning smarter with AI-powered education — free, private, and in your own language.</p>
+
+      <div class="left-features">
+        <div class="left-feat">
+          <div class="feat-icon">🤖</div>
+          AI Tutor that explains in simple Tamil
+        </div>
+        <div class="left-feat">
+          <div class="feat-icon">📚</div>
+          Upload & chat with Samacheer textbooks
+        </div>
+        <div class="left-feat">
+          <div class="feat-icon">📝</div>
+          Auto-generate quizzes and revision notes
+        </div>
+        <div class="left-feat">
+          <div class="feat-icon">🎤</div>
+          Ask doubts by voice in Tamil
+        </div>
+        <div class="left-feat">
+          <div class="feat-icon">📈</div>
+          Track your progress with AI insights
+        </div>
+      </div>
+    </div>
+
+    <div class="left-bottom">
+      <div class="testimonial-card">
+        <div class="testi-quote">"TamilAI என் வாழ்க்கையை மாற்றியது. கணிதம் புரியாமல் இருந்தேன், இப்போது class-ல் first வருகிறேன்!"</div>
+        <div class="testi-author-row">
+          <div class="testi-av">அர்</div>
+          <div>
+            <div class="testi-name-sm">அர்ஜுன் குமார்</div>
+            <div class="testi-role-sm">Class 10, GHSS Madurai</div>
+            <div class="stars">★★★★★</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── RIGHT PANEL ────────────────────────────────────── -->
+  <div class="right-panel">
+    <div class="auth-box">
+
+      <!-- Tabs -->
+      <div class="auth-tabs">
+        <div class="auth-tab active" id="tab-login" onclick="showPanel('login')">Sign In</div>
+        <div class="auth-tab" id="tab-register" onclick="showPanel('register')">Create Account</div>
+      </div>
+
+      <!-- ── LOGIN PANEL ──────────────────────────────────── -->
+      <div id="panel-login" class="form-panel">
+        <div class="auth-heading">Welcome back 👋</div>
+        <div class="auth-sub">Sign in to continue your learning journey.</div>
+
+        <div class="error-banner" id="login-error"></div>
+
+        <!-- Google -->
+        <button class="btn-google" onclick="alert('Google SSO coming soon!')">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Continue with Google
+        </button>
+
+        <div class="divider">or sign in with email</div>
+
+        <form id="login-form" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label class="form-label">Email address</label>
+            <div class="input-wrapper">
+              <span class="input-icon">✉</span>
+              <input type="email" id="login-email" class="form-input" placeholder="you@example.com" autocomplete="email"/>
+            </div>
+            <div class="field-error" id="login-email-err"></div>
+          </div>
+
+          <div class="form-group">
+            <div style="display:flex; justify-content:space-between; align-items:center">
+              <label class="form-label" style="margin-bottom:6px">Password</label>
+              <a class="forgot-link" href="#" onclick="showForgot()">Forgot password?</a>
+            </div>
+            <div class="input-wrapper">
+              <span class="input-icon">🔒</span>
+              <input type="password" id="login-password" class="form-input" placeholder="Enter your password" autocomplete="current-password"/>
+              <button type="button" class="input-toggle" onclick="togglePwd('login-password', this)">👁</button>
+            </div>
+            <div class="field-error" id="login-pwd-err"></div>
+          </div>
+
+          <button type="submit" class="btn-submit" id="login-btn">
+            <div class="spinner" id="login-spinner"></div>
+            <span id="login-btn-text">Sign in to TamilAI</span>
+          </button>
+        </form>
+
+        <div class="switch-mode">
+          New here? <a onclick="showPanel('register')">Create a free account →</a>
+        </div>
+      </div>
+
+      <!-- ── REGISTER PANEL ────────────────────────────────── -->
+      <div id="panel-register" class="form-panel" style="display:none">
+        <div class="auth-heading">Join TamilAI free 🎉</div>
+        <div class="auth-sub">Start your AI-powered learning journey today.</div>
+
+        <div class="error-banner" id="register-error"></div>
+
+        <form id="register-form" onsubmit="handleRegister(event)">
+
+          <!-- Role -->
+          <div class="form-group">
+            <label class="form-label">I am a…</label>
+            <div class="role-selector">
+              <label class="role-opt selected" id="role-student" onclick="selectRole('student')">
+                <input type="radio" name="role" value="student" checked/>
+                <span class="role-emoji">🎓</span>
+                <span class="role-name">Student</span>
+              </label>
+              <label class="role-opt" id="role-teacher" onclick="selectRole('teacher')">
+                <input type="radio" name="role" value="teacher"/>
+                <span class="role-emoji">👩‍🏫</span>
+                <span class="role-name">Teacher</span>
+              </label>
+              <label class="role-opt" id="role-parent" onclick="selectRole('parent')">
+                <input type="radio" name="role" value="parent"/>
+                <span class="role-emoji">👨‍👩‍👧</span>
+                <span class="role-name">Parent</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Full name</label>
+            <div class="input-wrapper">
+              <span class="input-icon">👤</span>
+              <input type="text" id="reg-name" class="form-input" placeholder="உங்கள் பெயர்" autocomplete="name"/>
+            </div>
+            <div class="field-error" id="reg-name-err"></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email address</label>
+            <div class="input-wrapper">
+              <span class="input-icon">✉</span>
+              <input type="email" id="reg-email" class="form-input" placeholder="you@example.com" autocomplete="email"/>
+            </div>
+            <div class="field-error" id="reg-email-err"></div>
+          </div>
+
+          <div class="form-row" id="student-fields">
+            <div class="form-group">
+              <label class="form-label">Class / Grade</label>
+              <select id="reg-class" class="form-input">
+                <option value="">Select class</option>
+                <option>Class 6</option><option>Class 7</option><option>Class 8</option>
+                <option>Class 9</option><option>Class 10</option><option>Class 11</option>
+                <option>Class 12</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">School name</label>
+              <input type="text" id="reg-school" class="form-input" placeholder="Your school"/>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="input-wrapper">
+              <span class="input-icon">🔒</span>
+              <input type="password" id="reg-password" class="form-input" placeholder="Minimum 6 characters" oninput="checkStrength(this.value)" autocomplete="new-password"/>
+              <button type="button" class="input-toggle" onclick="togglePwd('reg-password', this)">👁</button>
+            </div>
+            <div class="pwd-strength">
+              <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+              <div class="strength-label" id="strength-label">Enter a password</div>
+            </div>
+            <div class="field-error" id="reg-pwd-err"></div>
+          </div>
+
+          <button type="submit" class="btn-submit" id="reg-btn">
+            <div class="spinner" id="reg-spinner"></div>
+            <span id="reg-btn-text">Create Free Account</span>
+          </button>
+        </form>
+
+        <div class="terms">
+          By signing up, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.<br/>
+          Your data is private, secure, and never sold.
+        </div>
+
+        <div class="switch-mode">
+          Already have an account? <a onclick="showPanel('login')">Sign in →</a>
+        </div>
+      </div>
+
+      <!-- ── SUCCESS SCREEN ──────────────────────────────────── -->
+      <div id="success-screen" class="success-screen">
+        <div class="success-icon">🎉</div>
+        <h2 style="font-size:22px; font-weight:800; color:var(--gray-900); margin-bottom:8px">Welcome to TamilAI!</h2>
+        <p style="color:var(--gray-500); font-size:14px; margin-bottom:24px; font-family:var(--font-tamil)">
+          உங்கள் கற்றல் பயணம் இப்போது தொடங்கியது. Dashboard-க்கு அழைத்துச் செல்கிறோம்…
+        </p>
+        <div style="display:flex; justify-content:center">
+          <div style="width:40px; height:4px; border-radius:99px; background:var(--gray-200); overflow:hidden">
+            <div id="progress-bar" style="width:0; height:100%; background:linear-gradient(90deg,var(--blue),var(--purple)); border-radius:99px; transition:width 2s linear"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TamilAI – Voice Tutor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --blue:#2563EB;--purple:#7C3AED;--cyan:#06B6D4;
+      --green:#10B981;--red:#EF4444;--amber:#F59E0B;
+      --gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;
+      --gray-400:#94A3B8;--gray-500:#64748B;--gray-600:#475569;
+      --gray-700:#334155;--gray-800:#1E293B;--gray-900:#0F172A;
+      --sidebar-w:260px;
+      --font:'Inter',sans-serif;--font-t:'Noto Sans Tamil','Inter',sans-serif;
+    }
+    html,body{height:100%}
+    body{font-family:var(--font);background:var(--gray-50);display:flex;-webkit-font-smoothing:antialiased}
+ 
+    .sidebar{width:var(--sidebar-w);flex-shrink:0;background:#fff;border-right:1px solid var(--gray-200);display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;z-index:100}
+    .sidebar-header{padding:20px;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;gap:10px}
+    .logo-icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:17px;color:#fff;font-weight:800;font-family:var(--font-t)}
+    .logo-text{font-size:17px;font-weight:700;color:var(--gray-900)}
+    .logo-text span{background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .sidebar-nav{flex:1;padding:12px;overflow-y:auto}
+    .nav-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray-400);padding:8px 8px 6px}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;font-size:14px;font-weight:500;color:var(--gray-600);cursor:pointer;margin-bottom:2px;text-decoration:none;transition:background .15s,color .15s}
+    .nav-item:hover{background:var(--gray-50);color:var(--gray-900)}
+    .nav-item.active{background:rgba(37,99,235,.08);color:var(--blue);font-weight:600}
+    .nav-icon{width:28px;height:28px;border-radius:6px;background:var(--gray-200);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+ 
+    .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
+    .topbar{background:#fff;border-bottom:1px solid var(--gray-200);padding:0 32px;height:64px;display:flex;align-items:center;gap:16px}
+    .topbar-title{font-size:18px;font-weight:700;color:var(--gray-900)}
+    .topbar-sub{font-size:13px;color:var(--gray-400)}
+ 
+    .content{flex:1;display:flex;overflow:hidden}
+ 
+    /* ── LEFT: Voice Interface ────────────────────────────── */
+    .voice-panel{
+      flex:0 0 420px;background:linear-gradient(160deg,var(--gray-900) 0%,#1a1040 50%,#0f1a40 100%);
+      display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+      padding:40px 32px;position:relative;overflow:hidden;
+    }
+ 
+    /* Background particles */
+    .voice-panel::before{
+      content:'';position:absolute;inset:0;
+      background:radial-gradient(ellipse 60% 40% at 50% 30%,rgba(37,99,235,.15) 0%,transparent 60%),
+                 radial-gradient(ellipse 40% 40% at 20% 80%,rgba(124,58,237,.1) 0%,transparent 50%);
+    }
+ 
+    .voice-top{text-align:center;position:relative;z-index:1}
+    .voice-brand{font-size:15px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+    .voice-title{font-size:26px;font-weight:800;color:#fff;letter-spacing:-.5px;margin-bottom:4px}
+    .voice-sub{font-size:14px;color:rgba(255,255,255,.5);font-family:var(--font-t)}
+ 
+    /* Subject pills */
+    .voice-subjects{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:16px}
+    .v-subj{padding:5px 12px;border-radius:99px;font-size:11px;font-weight:600;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);cursor:pointer;transition:all .2s}
+    .v-subj:hover,.v-subj.active{border-color:var(--cyan);color:var(--cyan);background:rgba(6,182,212,.1)}
+ 
+    /* ── MIC ZONE ─────────────────────────────────────────── */
+    .mic-zone{display:flex;flex-direction:column;align-items:center;gap:24px;position:relative;z-index:1}
+ 
+    /* Waveform rings */
+    .mic-rings{position:relative;width:200px;height:200px;display:flex;align-items:center;justify-content:center}
+    .ring{
+      position:absolute;border-radius:50%;border:1.5px solid rgba(37,99,235,.3);
+      animation:ringPulse 2.5s ease-in-out infinite;
+    }
+    .ring:nth-child(1){width:200px;height:200px;animation-delay:0s}
+    .ring:nth-child(2){width:160px;height:160px;animation-delay:.4s}
+    .ring:nth-child(3){width:120px;height:120px;animation-delay:.8s}
+    @keyframes ringPulse{0%,100%{transform:scale(1);opacity:.3}50%{transform:scale(1.05);opacity:.6}}
+ 
+    /* Active listening state */
+    .mic-rings.listening .ring{border-color:rgba(6,182,212,.5);animation:ringActive 1s ease-in-out infinite}
+    @keyframes ringActive{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.08);opacity:.9}}
+ 
+    /* Speaking state */
+    .mic-rings.speaking .ring{border-color:rgba(16,185,129,.5);animation:ringSpeaking .6s ease-in-out infinite}
+    @keyframes ringSpeaking{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(1.1);opacity:.8}}
+ 
+    .mic-btn{
+      width:84px;height:84px;border-radius:50%;
+      background:linear-gradient(135deg,var(--blue),var(--purple));
+      border:none;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+      font-size:34px;position:relative;z-index:2;
+      box-shadow:0 8px 32px rgba(37,99,235,.5);
+      transition:transform .2s,box-shadow .2s;
+    }
+    .mic-btn:hover{transform:scale(1.05);box-shadow:0 12px 40px rgba(37,99,235,.6)}
+    .mic-btn.listening{background:linear-gradient(135deg,var(--cyan),var(--blue));box-shadow:0 8px 40px rgba(6,182,212,.6);animation:micPulse .8s ease-in-out infinite}
+    .mic-btn.speaking{background:linear-gradient(135deg,var(--green),var(--cyan));box-shadow:0 8px 40px rgba(16,185,129,.5)}
+    @keyframes micPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+ 
+    .mic-status{font-size:14px;font-weight:600;color:rgba(255,255,255,.7);text-align:center;font-family:var(--font-t);min-height:44px;line-height:1.5}
+    .mic-status.listening{color:var(--cyan)}
+    .mic-status.speaking{color:var(--green)}
+ 
+    /* Waveform bars */
+    .waveform{display:flex;gap:3px;align-items:center;height:40px}
+    .wave-bar{width:4px;border-radius:99px;background:rgba(255,255,255,.2);transition:height .15s ease}
+    .waveform.active .wave-bar{background:var(--cyan);animation:waveAnim .5s ease-in-out infinite}
+    .waveform.speaking .wave-bar{background:var(--green);animation:waveAnim .3s ease-in-out infinite}
+    .wave-bar:nth-child(1){animation-delay:.0s}.wave-bar:nth-child(2){animation-delay:.05s}.wave-bar:nth-child(3){animation-delay:.1s}
+    .wave-bar:nth-child(4){animation-delay:.15s}.wave-bar:nth-child(5){animation-delay:.2s}.wave-bar:nth-child(6){animation-delay:.25s}
+    .wave-bar:nth-child(7){animation-delay:.3s}.wave-bar:nth-child(8){animation-delay:.35s}
+    @keyframes waveAnim{0%,100%{height:6px}50%{height:28px}}
+ 
+    /* Transcript display */
+    .transcript-box{
+      width:100%;padding:14px 16px;border-radius:12px;
+      background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
+      min-height:56px;font-size:14px;color:#fff;
+      font-family:var(--font-t);line-height:1.6;text-align:center;
+    }
+    .transcript-box.empty{color:rgba(255,255,255,.3);font-style:italic}
+ 
+    /* Controls */
+    .voice-controls{display:flex;gap:10px;justify-content:center}
+    .vc-btn{
+      padding:9px 18px;border-radius:99px;font-size:13px;font-weight:600;
+      border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);
+      color:rgba(255,255,255,.7);cursor:pointer;transition:all .2s;
+      display:flex;align-items:center;gap:6px;
+    }
+    .vc-btn:hover{background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.3)}
+ 
+    /* Language selector */
+    .lang-row{display:flex;gap:8px;justify-content:center}
+    .lang-btn{padding:6px 14px;border-radius:99px;font-size:12px;font-weight:700;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.5);cursor:pointer;transition:all .2s}
+    .lang-btn.active{background:rgba(37,99,235,.3);border-color:var(--blue);color:var(--cyan)}
+ 
+    /* ── RIGHT: Chat history ─────────────────────────────── */
+    .chat-panel{flex:1;display:flex;flex-direction:column;overflow:hidden}
+ 
+    .chat-header2{background:#fff;border-bottom:1px solid var(--gray-200);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .ch2-title{font-size:15px;font-weight:700;color:var(--gray-900)}
+    .ch2-sub{font-size:12px;color:var(--gray-400)}
+    .ch2-actions{display:flex;gap:8px}
+    .ch2-btn{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1.5px solid var(--gray-200);background:#fff;color:var(--gray-600);cursor:pointer;transition:all .18s}
+    .ch2-btn:hover{border-color:var(--blue);color:var(--blue)}
+ 
+    .voice-msgs{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px}
+    .voice-msgs::-webkit-scrollbar{width:4px}
+    .voice-msgs::-webkit-scrollbar-thumb{background:var(--gray-200);border-radius:99px}
+ 
+    .v-msg{display:flex;gap:10px;align-items:flex-start;animation:msgIn .3s ease}
+    .v-msg.user{flex-direction:row-reverse}
+    @keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .v-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+    .v-av.ai{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff}
+    .v-av.user{background:var(--gray-200);color:var(--gray-600)}
+    .v-bubble{padding:12px 16px;border-radius:14px;font-size:14px;line-height:1.75;max-width:78%;font-family:var(--font-t)}
+    .v-bubble.ai{background:#fff;border:1px solid var(--gray-200);color:var(--gray-800);border-top-left-radius:4px}
+    .v-bubble.user{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;border-top-right-radius:4px}
+    .v-time{font-size:10px;color:var(--gray-400);margin-top:3px}
+    .v-msg.user .v-time{text-align:right}
+ 
+    /* Audio player */
+    .audio-player{
+      display:flex;align-items:center;gap:10px;margin-top:8px;
+      padding:8px 12px;border-radius:10px;
+      background:rgba(37,99,235,.05);border:1px solid rgba(37,99,235,.1);
+    }
+    .play-btn{width:28px;height:28px;border-radius:50%;background:var(--blue);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;flex-shrink:0;transition:opacity .2s}
+    .play-btn:hover{opacity:.8}
+    .audio-wave{flex:1;height:24px;display:flex;gap:2px;align-items:center}
+    .aw-bar{width:3px;border-radius:99px;background:var(--blue);opacity:.4}
+    .audio-dur{font-size:11px;color:var(--blue);font-weight:600}
+ 
+    /* Tips panel */
+    .tips-panel{padding:16px 24px;background:var(--gray-50);border-top:1px solid var(--gray-200);flex-shrink:0}
+    .tips-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gray-400);margin-bottom:10px}
+    .tips-row{display:flex;gap:8px;flex-wrap:wrap}
+    .tip-chip{padding:6px 12px;border-radius:99px;font-size:12px;background:#fff;border:1px solid var(--gray-200);color:var(--gray-600);cursor:pointer;font-family:var(--font-t);transition:all .18s}
+    .tip-chip:hover{border-color:var(--blue);color:var(--blue)}
+ 
+    @media(max-width:900px){.voice-panel{flex:0 0 300px;padding:28px 20px}}
+    @media(max-width:768px){.sidebar{display:none}.main{margin-left:0}.content{flex-direction:column}.voice-panel{flex:0 0 auto;height:auto;padding:24px}}
+  </style>
+</head>
+<body>
+ 
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-icon">த</div>
+    <span class="logo-text">Tamil<span>AI</span></span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Main</div>
+    <a class="nav-item" href="dashboard.html"><div class="nav-icon">🏠</div> Dashboard</a>
+    <a class="nav-item" href="tutor.html"><div class="nav-icon">🤖</div> AI Tutor</a>
+    <a class="nav-item active"><div class="nav-icon">🎤</div> Voice Tutor</a>
+    <a class="nav-item" href="textbook.html"><div class="nav-icon">📚</div> My Textbooks</a>
+    <div class="nav-label" style="margin-top:8px">Learning</div>
+    <a class="nav-item" href="quiz.html"><div class="nav-icon">❓</div> Quiz Generator</a>
+    <a class="nav-item" href="notes.html"><div class="nav-icon">📝</div> Notes AI</a>
+    <div class="nav-label" style="margin-top:8px">Track</div>
+    <a class="nav-item" href="progress.html"><div class="nav-icon">📈</div> My Progress</a>
+  </nav>
+</aside>
+ 
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">🎤 Voice Tutor</div>
+      <div class="topbar-sub">பேசுங்கள் — AI தமிழில் பதில் சொல்லும்</div>
+    </div>
+    <div style="margin-left:auto">
+      <button onclick="location.href='dashboard.html'" style="padding:8px 16px;border-radius:8px;border:1.5px solid var(--gray-200);background:#fff;font-size:13px;font-weight:600;cursor:pointer;color:var(--gray-700)">← Dashboard</button>
+    </div>
+  </div>
+ 
+  <div class="content">
+ 
+    <!-- LEFT: Voice Interface -->
+    <div class="voice-panel">
+      <div class="voice-top">
+        <div class="voice-brand">Voice Tutor</div>
+        <div class="voice-title">🎤 பேசுங்கள்!</div>
+        <div class="voice-sub">உங்கள் கேள்வியை தமிழில் கேளுங்கள்</div>
+        <div class="voice-subjects" id="voiceSubjects">
+          <span class="v-subj active" data-s="General" onclick="setVoiceSubject(this)">🌟 General</span>
+          <span class="v-subj" data-s="Science" onclick="setVoiceSubject(this)">🔬 அறிவியல்</span>
+          <span class="v-subj" data-s="Maths" onclick="setVoiceSubject(this)">📐 கணிதம்</span>
+          <span class="v-subj" data-s="Tamil" onclick="setVoiceSubject(this)">📖 தமிழ்</span>
+          <span class="v-subj" data-s="Physics" onclick="setVoiceSubject(this)">⚛️ Physics</span>
+        </div>
+      </div>
+ 
+      <div class="mic-zone">
+        <!-- Animated rings + mic button -->
+        <div class="mic-rings" id="micRings">
+          <div class="ring"></div>
+          <div class="ring"></div>
+          <div class="ring"></div>
+          <button class="mic-btn" id="micBtn" onclick="toggleListening()">🎤</button>
+        </div>
+ 
+        <!-- Status text -->
+        <div class="mic-status" id="micStatus">
+          माइक बटन को दबाएं<br/>
+          <small style="font-size:12px;opacity:.7">Tap the mic to start speaking</small>
+        </div>
+ 
+        <!-- Waveform -->
+        <div class="waveform" id="waveform">
+          <div class="wave-bar" style="height:6px"></div>
+          <div class="wave-bar" style="height:6px"></div>
+          <div class="wave-bar" style="height:6px"></div>
+          <div class="wave-bar" style="height:6px"></div>
+          <div class="wave-bar" style="height:6px"></div>
+          <div class="wave-bar" style="height:6px"></div>
+          <div class="wave-bar" style="height:6px"></div>
+          <div class="wave-bar" style="height:6px"></div>
+        </div>
+ 
+        <!-- Transcript -->
+        <div class="transcript-box empty" id="transcriptBox">
+          உங்கள் கேள்வி இங்கே தோன்றும்…
+        </div>
+      </div>
+ 
+      <div style="display:flex;flex-direction:column;gap:12px;width:100%;position:relative;z-index:1">
+        <!-- Language selection -->
+        <div class="lang-row">
+          <button class="lang-btn active" onclick="setLang('ta-IN',this)">🇮🇳 Tamil</button>
+          <button class="lang-btn" onclick="setLang('en-IN',this)">🇬🇧 English</button>
+          <button class="lang-btn" onclick="setLang('hi-IN',this)">🇮🇳 Hindi</button>
+        </div>
+ 
+        <!-- Controls -->
+        <div class="voice-controls">
+          <button class="vc-btn" onclick="clearVoiceChat()">🗑 Clear</button>
+          <button class="vc-btn" onclick="stopSpeaking()" id="stopSpeakBtn" style="display:none">⏹ Stop</button>
+          <button class="vc-btn" onclick="toggleAutoListen()" id="autoListenBtn">🔄 Auto-listen: OFF</button>
+        </div>
+ 
+        <!-- Session stats -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          <div style="text-align:center;padding:10px 6px;background:rgba(255,255,255,.07);border-radius:10px;border:1px solid rgba(255,255,255,.1)">
+            <div style="font-size:20px;font-weight:800;color:var(--cyan)" id="voiceMsgs">0</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.5);margin-top:2px">Questions</div>
+          </div>
+          <div style="text-align:center;padding:10px 6px;background:rgba(255,255,255,.07);border-radius:10px;border:1px solid rgba(255,255,255,.1)">
+            <div style="font-size:20px;font-weight:800;color:var(--green)" id="voiceXP">0</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.5);margin-top:2px">XP Earned</div>
+          </div>
+          <div style="text-align:center;padding:10px 6px;background:rgba(255,255,255,.07);border-radius:10px;border:1px solid rgba(255,255,255,.1)">
+            <div style="font-size:20px;font-weight:800;color:var(--amber)" id="voiceTime">0m</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.5);margin-top:2px">Session</div>
+          </div>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- RIGHT: Conversation -->
+    <div class="chat-panel">
+      <div class="chat-header2">
+        <div>
+          <div class="ch2-title">Conversation</div>
+          <div class="ch2-sub" id="sessionSubLabel">General · Voice Session</div>
+        </div>
+        <div class="ch2-actions">
+          <button class="ch2-btn" onclick="exportConversation()">📋 Export</button>
+          <button class="ch2-btn" onclick="location.href='tutor.html'">💬 Text Mode</button>
+        </div>
+      </div>
+ 
+      <div class="voice-msgs" id="voiceMessages">
+        <!-- Welcome -->
+        <div class="v-msg">
+          <div class="v-av ai">🎤</div>
+          <div>
+            <div class="v-bubble ai">
+              வணக்கம்! 👋 நான் TamilAI Voice Tutor.<br/><br/>
+              🎤 மைக் பட்டனை அழுத்தி <strong>தமிழில் பேசுங்கள்</strong> — நான் கேட்டு தமிழிலேயே பதில் சொல்வேன்.<br/><br/>
+              ஒளிச்சேர்க்கை, நியூட்டன் விதிகள், கணிதம் — எந்த விஷயமும் கேளுங்கள்!
+            </div>
+            <div class="v-time">Just now</div>
+          </div>
+        </div>
+      </div>
+ 
+      <div class="tips-panel">
+        <div class="tips-title">💡 Try saying</div>
+        <div class="tips-row">
+          <span class="tip-chip" onclick="tryPhrase(this)">ஒளிச்சேர்க்கை என்றால் என்ன?</span>
+          <span class="tip-chip" onclick="tryPhrase(this)">நியூட்டன் விதிகளை விளக்குங்கள்</span>
+          <span class="tip-chip" onclick="tryPhrase(this)">வட்டியை எப்படி கணக்கிடுவது?</span>
+          <span class="tip-chip" onclick="tryPhrase(this)">தமிழ் இலக்கணம் பற்றி சொல்லுங்கள்</span>
+          <span class="tip-chip" onclick="tryPhrase(this)">DNA அமைப்பை விளக்குங்கள்</span>
+        </div>
+      </div>
+    </div>
+ 
+  </div>
+</div>
+ 
+<script>
+const API = 'http://localhost:5000/api';
+const token = localStorage.getItem('tamilai_token');
+ 
+let state = {
+  isListening: false, isSpeaking: false,
+  recognition: null, synth: window.speechSynthesis,
+  lang: 'ta-IN', subject: 'General',
+  autoListen: false, msgCount: 0, xp: 0,
+  sessionStart: Date.now(), currentUtterance: null,
+};
+ 
+// Session timer
+setInterval(() => {
+  const mins = Math.floor((Date.now() - state.sessionStart) / 60000);
+  document.getElementById('voiceTime').textContent = mins + 'm';
+}, 10000);
+ 
+function setVoiceSubject(el) {
+  document.querySelectorAll('.v-subj').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  state.subject = el.dataset.s;
+  document.getElementById('sessionSubLabel').textContent = `${state.subject} · Voice Session`;
+}
+ 
+function setLang(lang, el) {
+  state.lang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+ 
+// ── Listening ────────────────────────────────────────────────
+function toggleListening() {
+  if (state.isSpeaking) { stopSpeaking(); return; }
+  if (state.isListening) stopListening();
+  else startListening();
+}
+ 
+function startListening() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    showBrowserWarning(); return;
+  }
+ 
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  state.recognition = new SR();
+  state.recognition.lang = state.lang;
+  state.recognition.continuous = false;
+  state.recognition.interimResults = true;
+  state.recognition.maxAlternatives = 1;
+ 
+  state.recognition.onstart = () => {
+    state.isListening = true;
+    setUIState('listening');
+  };
+ 
+  state.recognition.onresult = (e) => {
+    let interim = '', final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) final += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
+    }
+    const transcript = final || interim;
+    showTranscript(transcript, !final);
+  };
+ 
+  state.recognition.onend = () => {
+    state.isListening = false;
+    const transcript = document.getElementById('transcriptBox').textContent;
+    if (transcript && !transcript.includes('உங்கள் கேள்வி') && transcript.trim().length > 2) {
+      processVoiceQuery(transcript.trim());
+    } else {
+      setUIState('idle');
+    }
+  };
+ 
+  state.recognition.onerror = (e) => {
+    state.isListening = false;
+    setUIState('idle');
+    if (e.error !== 'no-speech') showError(`Mic error: ${e.error}`);
+  };
+ 
+  state.recognition.start();
+}
+ 
+function stopListening() {
+  state.recognition?.stop();
+  state.isListening = false;
+  setUIState('idle');
+}
+ 
+// ── Process query ────────────────────────────────────────────
+async function processVoiceQuery(query) {
+  setUIState('processing');
+  addVoiceMessage('user', query);
+ 
+  try {
+    const res = await fetch(`${API}/chat/ask`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${token||''}`},
+      body: JSON.stringify({ message: query, subject: state.subject, session_id: 'voice_' + Date.now() })
+    });
+ 
+    let answer;
+    if (res.ok) {
+      const data = await res.json();
+      answer = data.response;
+    } else {
+      answer = getDemoVoiceAnswer(query);
+    }
+ 
+    addVoiceMessage('assistant', answer);
+    speakAnswer(answer);
+ 
+    state.msgCount++;
+    state.xp += 15;
+    document.getElementById('voiceMsgs').textContent = state.msgCount;
+    document.getElementById('voiceXP').textContent   = state.xp;
+ 
+  } catch {
+    const answer = getDemoVoiceAnswer(query);
+    addVoiceMessage('assistant', answer);
+    speakAnswer(answer);
+  }
+}
+ 
+function getDemoVoiceAnswer(query) {
+  const q = query.toLowerCase();
+  if (q.includes('ஒளிச்சேர்க்கை') || q.includes('photosynthesis')) {
+    return 'ஒளிச்சேர்க்கை என்பது தாவரங்கள் சூரிய ஒளியை பயன்படுத்தி உணவு தயாரிக்கும் செயல்முறை. இது குளோரோபிளாஸ்ட்டில் நடைபெறுகிறது. கார்பன் டை ஆக்சைடு மற்றும் நீர் சேர்ந்து குளுக்கோஸும் ஆக்சிஜனும் உருவாகுகின்றன.';
+  }
+  if (q.includes('newton') || q.includes('நியூட்டன்')) {
+    return 'நியூட்டன் மூன்று இயக்க விதிகள் உள்ளன. முதல் விதி: ஒரு பொருள் வெளிப்புற விசை இல்லாமல் தனது நிலையை மாற்றாது. இரண்டாம் விதி: விசை சமம் திணிவு பெருக்கல் முடுக்கம். மூன்றாம் விதி: ஒவ்வொரு செயலுக்கும் சம எதிர்வினை உண்டு.';
+  }
+  return `நீங்கள் கேட்டது: "${query}". இது ஒரு சிறந்த கேள்வி! தமிழ் Voice Tutor சரியாக இயங்குகிறது. Backend API இணைக்கப்பட்டவுடன் முழு பதில் கிடைக்கும்.`;
+}
+ 
+// ── Speech Synthesis (TTS) ───────────────────────────────────
+function speakAnswer(text) {
+  if (!state.synth) return;
+  stopSpeaking();
+ 
+  // Clean text for speech
+  const cleaned = text
+    .replace(/\*\*/g, '').replace(/[#*_`]/g, '')
+    .replace(/\n\n/g, '. ').replace(/\n/g, ' ')
+    .slice(0, 500); // limit for TTS
+ 
+  const utterance = new SpeechSynthesisUtterance(cleaned);
+ 
+  // Try Tamil voice, fallback to default
+  const voices = state.synth.getVoices();
+  const tamilVoice = voices.find(v => v.lang.startsWith('ta') || v.name.toLowerCase().includes('tamil'));
+  if (tamilVoice) utterance.voice = tamilVoice;
+ 
+  utterance.lang  = state.lang;
+  utterance.rate  = 0.9;
+  utterance.pitch = 1.0;
+  utterance.volume = 1.0;
+ 
+  utterance.onstart = () => { state.isSpeaking = true; setUIState('speaking'); };
+  utterance.onend   = () => {
+    state.isSpeaking = false; setUIState('idle');
+    if (state.autoListen) setTimeout(startListening, 800);
+  };
+  utterance.onerror  = () => { state.isSpeaking = false; setUIState('idle'); };
+ 
+  state.currentUtterance = utterance;
+  state.synth.speak(utterance);
+}
+ 
+function stopSpeaking() {
+  state.synth?.cancel();
+  state.isSpeaking = false;
+  setUIState('idle');
+}
+ 
+// ── UI State Machine ─────────────────────────────────────────
+function setUIState(s) {
+  const micBtn    = document.getElementById('micBtn');
+  const micRings  = document.getElementById('micRings');
+  const waveform  = document.getElementById('waveform');
+  const status    = document.getElementById('micStatus');
+  const stopBtn   = document.getElementById('stopSpeakBtn');
+ 
+  micBtn.className    = 'mic-btn';
+  micRings.className  = 'mic-rings';
+  waveform.className  = 'waveform';
+  status.className    = 'mic-status';
+  stopBtn.style.display = 'none';
+ 
+  if (s === 'listening') {
+    micBtn.classList.add('listening'); micBtn.textContent = '🔴';
+    micRings.classList.add('listening'); waveform.classList.add('active');
+    status.classList.add('listening');
+    status.innerHTML = '🎙 கேட்கிறேன்…<br/><small style="font-size:12px;opacity:.7">Listening — speak now</small>';
+    document.getElementById('transcriptBox').textContent = '';
+    document.getElementById('transcriptBox').classList.remove('empty');
+  } else if (s === 'processing') {
+    micBtn.textContent = '⏳'; status.innerHTML = '🧠 AI சிந்திக்கிறது…<br/><small>Processing your question</small>';
+  } else if (s === 'speaking') {
+    micBtn.classList.add('speaking'); micBtn.textContent = '🔊';
+    micRings.classList.add('speaking'); waveform.classList.add('speaking');
+    status.classList.add('speaking');
+    status.innerHTML = '🔊 பதில் சொல்கிறேன்…<br/><small style="font-size:12px;opacity:.7">Speaking the answer</small>';
+    stopBtn.style.display = 'flex';
+  } else {
+    micBtn.textContent = '🎤';
+    status.innerHTML = 'மைக் பட்டனை அழுத்துங்கள்<br/><small style="font-size:12px;opacity:.7">Tap the mic to start</small>';
+  }
+}
+ 
+function showTranscript(text, interim) {
+  const el = document.getElementById('transcriptBox');
+  el.classList.remove('empty');
+  el.textContent = text + (interim ? ' …' : '');
+}
+ 
+// ── Messages ─────────────────────────────────────────────────
+function addVoiceMessage(role, content) {
+  const el  = document.getElementById('voiceMessages');
+  const div = document.createElement('div');
+  div.className = `v-msg ${role === 'user' ? 'user' : ''}`;
+ 
+  const clean = content.replace(/\*\*/g,'').replace(/[#*`]/g,'');
+  const audioHTML = role === 'assistant' ? buildAudioPlayer(clean) : '';
+ 
+  div.innerHTML = `
+    ${role !== 'user' ? '<div class="v-av ai">🎤</div>' : ''}
+    <div>
+      <div class="v-bubble ${role === 'user' ? 'user' : 'ai'}">${content.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br/>')}</div>
+      ${audioHTML}
+      <div class="v-time">${now()}</div>
+    </div>
+    ${role === 'user' ? '<div class="v-av user">👤</div>' : ''}`;
+ 
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+ 
+function buildAudioPlayer(text) {
+  const barCount = 20;
+  const bars = Array.from({length:barCount},(_,i) => {
+    const h = 4 + Math.random() * 16;
+    return `<div class="aw-bar" style="height:${h}px"></div>`;
+  }).join('');
+  const dur = Math.round(text.length / 15);
+  return `
+    <div class="audio-player">
+      <button class="play-btn" onclick="reSpeakText(\`${text.replace(/`/g,"'").slice(0,200)}\`,this)">▶</button>
+      <div class="audio-wave">${bars}</div>
+      <span class="audio-dur">~${dur}s</span>
+    </div>`;
+}
+ 
+function reSpeakText(text, btn) {
+  stopSpeaking();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = state.lang; u.rate = 0.9;
+  u.onstart = () => { btn.textContent = '⏸'; };
+  u.onend   = () => { btn.textContent = '▶'; };
+  window.speechSynthesis.speak(u);
+}
+ 
+function tryPhrase(el) {
+  showTranscript(el.textContent, false);
+  processVoiceQuery(el.textContent);
+}
+ 
+function toggleAutoListen() {
+  state.autoListen = !state.autoListen;
+  document.getElementById('autoListenBtn').textContent = `🔄 Auto-listen: ${state.autoListen ? 'ON' : 'OFF'}`;
+  document.getElementById('autoListenBtn').style.borderColor = state.autoListen ? 'var(--cyan)' : '';
+  document.getElementById('autoListenBtn').style.color = state.autoListen ? 'var(--cyan)' : '';
+}
+ 
+function clearVoiceChat() {
+  document.getElementById('voiceMessages').innerHTML = '';
+  state.msgCount = 0; state.xp = 0;
+  document.getElementById('voiceMsgs').textContent = '0';
+  document.getElementById('voiceXP').textContent = '0';
+}
+ 
+function exportConversation() {
+  const msgs = [...document.querySelectorAll('.v-bubble')].map(b => b.innerText).join('\n\n---\n\n');
+  const blob = new Blob([msgs], {type:'text/plain'});
+  const a    = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'voice-session.txt'; a.click();
+}
+ 
+function showBrowserWarning() {
+  addVoiceMessage('assistant', '⚠️ உங்கள் browser-ல் speech recognition support இல்லை. Google Chrome browser பயன்படுத்துங்கள். அல்லது text mode-ல் AI Tutor பயன்படுத்துங்கள்.');
+}
+ 
+function showError(msg) {
+  addVoiceMessage('assistant', `❌ ${msg}`);
+}
+ 
+function now() { return new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}); }
+ 
+// Load voices on init
+if (window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/logout.js"></script>
+<script>
+(async function () {
+
+    const { data } = await supabaseClient.auth.getSession();
+
+    if (!data.session) {
+        window.location.href = "auth.html";
+    }
+
+})();
+</script>
+</body>
+</html>

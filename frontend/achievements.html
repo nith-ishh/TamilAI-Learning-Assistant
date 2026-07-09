@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TamilAI – Achievements</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --blue:#2563EB;--purple:#7C3AED;--cyan:#06B6D4;
+      --green:#10B981;--red:#EF4444;--amber:#F59E0B;--pink:#EC4899;
+      --gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;
+      --gray-400:#94A3B8;--gray-500:#64748B;--gray-600:#475569;
+      --gray-700:#334155;--gray-800:#1E293B;--gray-900:#0F172A;
+      --sidebar-w:260px;
+      --font:'Inter',sans-serif;--font-t:'Noto Sans Tamil','Inter',sans-serif;
+    }
+    html,body{height:100%}
+    body{font-family:var(--font);background:var(--gray-50);display:flex;-webkit-font-smoothing:antialiased}
+
+    .sidebar{width:var(--sidebar-w);flex-shrink:0;background:#fff;border-right:1px solid var(--gray-200);display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;z-index:100}
+    .sidebar-header{padding:20px;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;gap:10px}
+    .logo-icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:17px;color:#fff;font-weight:800;font-family:var(--font-t)}
+    .logo-text{font-size:17px;font-weight:700;color:var(--gray-900)}
+    .logo-text span{background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .sidebar-nav{flex:1;padding:12px;overflow-y:auto}
+    .nav-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray-400);padding:8px 8px 6px}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;font-size:14px;font-weight:500;color:var(--gray-600);cursor:pointer;margin-bottom:2px;text-decoration:none;transition:background .15s,color .15s}
+    .nav-item:hover{background:var(--gray-50);color:var(--gray-900)}
+    .nav-item.active{background:rgba(37,99,235,.08);color:var(--blue);font-weight:600}
+    .nav-icon{width:28px;height:28px;border-radius:6px;background:var(--gray-200);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+
+    .main{margin-left:var(--sidebar-w);flex:1;overflow-y:auto}
+    .topbar{background:#fff;border-bottom:1px solid var(--gray-200);padding:0 32px;height:64px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:50}
+    .topbar-title{font-size:18px;font-weight:700;color:var(--gray-900)}
+    .content{padding:28px 32px;max-width:1200px;margin:0 auto}
+
+    /* ── HERO XP BAR ──────────────────────────────────────── */
+    .xp-hero{
+      background:linear-gradient(135deg,#1a1040 0%,#0f1a40 40%,var(--blue) 100%);
+      border-radius:20px;padding:32px 36px;margin-bottom:28px;
+      display:flex;align-items:center;gap:24px;position:relative;overflow:hidden;
+    }
+    .xp-hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='30' cy='30' r='1' fill='white' fill-opacity='0.04'/%3E%3C/svg%3E")}
+    .xp-avatar-wrap{position:relative;flex-shrink:0}
+    .xp-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--pink));display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#fff;border:3px solid rgba(255,255,255,.3)}
+    .xp-level-badge{position:absolute;bottom:-4px;right:-4px;width:28px;height:28px;border-radius:50%;background:var(--amber);border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff}
+    .xp-info{flex:1;position:relative;z-index:1}
+    .xp-name{font-size:22px;font-weight:800;color:#fff;margin-bottom:2px}
+    .xp-title{font-size:14px;color:rgba(255,255,255,.6);margin-bottom:16px}
+    .xp-bar-label{display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:rgba(255,255,255,.7);margin-bottom:6px}
+    .xp-bar-wrap{height:10px;background:rgba(255,255,255,.15);border-radius:99px;overflow:hidden}
+    .xp-bar-fill{height:100%;background:linear-gradient(90deg,var(--amber),var(--pink));border-radius:99px;transition:width 1.5s ease}
+    .xp-stats{display:flex;gap:20px;position:relative;z-index:1;flex-shrink:0}
+    .xp-stat{text-align:center}
+    .xp-stat-num{font-size:26px;font-weight:800;color:#fff}
+    .xp-stat-label{font-size:11px;color:rgba(255,255,255,.5);margin-top:2px}
+
+    /* ── TABS ─────────────────────────────────────────────── */
+    .tabs{display:flex;gap:0;border-bottom:1px solid var(--gray-200);margin-bottom:24px}
+    .tab{padding:12px 20px;font-size:14px;font-weight:600;color:var(--gray-500);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .2s,border-color .2s;display:flex;align-items:center;gap:6px}
+    .tab:hover{color:var(--gray-800)}
+    .tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+
+    /* ── ACHIEVEMENTS ─────────────────────────────────────── */
+    .badges-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .badge-card{
+      background:#fff;border:1px solid var(--gray-200);border-radius:16px;
+      padding:20px;text-align:center;cursor:default;
+      transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden;
+    }
+    .badge-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.09)}
+    .badge-card.locked{opacity:.45;filter:grayscale(.8)}
+    .badge-card.new::after{content:'NEW';position:absolute;top:10px;right:10px;font-size:9px;font-weight:800;letter-spacing:.5px;padding:2px 7px;border-radius:99px;background:var(--amber);color:#fff}
+    .badge-icon{font-size:40px;display:block;margin-bottom:10px}
+    .badge-name{font-size:13px;font-weight:700;color:var(--gray-900);margin-bottom:4px}
+    .badge-desc{font-size:11px;color:var(--gray-400);line-height:1.5}
+    .badge-xp{font-size:11px;font-weight:700;color:var(--amber);margin-top:8px}
+    .badge-earned{font-size:10px;color:var(--green);margin-top:4px;font-weight:600}
+    .badge-progress{margin-top:8px}
+    .bp-bar{height:4px;background:var(--gray-100);border-radius:99px;overflow:hidden;margin-top:4px}
+    .bp-fill{height:100%;background:var(--blue);border-radius:99px;transition:width 1s ease}
+    .bp-label{font-size:10px;color:var(--gray-400);text-align:right;margin-top:2px}
+
+    /* ── LEADERBOARD ──────────────────────────────────────── */
+    .lb-layout{display:grid;grid-template-columns:1fr 280px;gap:20px}
+
+    .lb-main-card{background:#fff;border:1px solid var(--gray-200);border-radius:14px;overflow:hidden}
+    .lb-filter-row{padding:16px 20px;border-bottom:1px solid var(--gray-200);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .lb-filter-label{font-size:12px;font-weight:600;color:var(--gray-500)}
+    .lb-filter-btn{padding:5px 12px;border-radius:99px;font-size:12px;font-weight:600;border:1.5px solid var(--gray-200);background:#fff;color:var(--gray-600);cursor:pointer;transition:all .2s}
+    .lb-filter-btn.active{border-color:var(--blue);background:rgba(37,99,235,.08);color:var(--blue)}
+
+    .lb-top3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;padding:24px 20px;background:linear-gradient(to bottom,rgba(37,99,235,.04),transparent);border-bottom:1px solid var(--gray-200)}
+    .lb-top-item{text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}
+    .lb-crown{font-size:20px;margin-bottom:-4px}
+    .lb-top-av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;margin:0 auto;position:relative}
+    .lb-top-av::after{content:attr(data-rank);position:absolute;bottom:-4px;right:-4px;width:20px;height:20px;border-radius:50%;background:var(--amber);border:2px solid #fff;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff}
+    .lb-top-name{font-size:13px;font-weight:700;color:var(--gray-900)}
+    .lb-top-xp{font-size:12px;font-weight:700;color:var(--amber)}
+    .lb-top-school{font-size:11px;color:var(--gray-400)}
+
+    .lb-rest{display:flex;flex-direction:column}
+    .lb-row{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--gray-100);transition:background .15s}
+    .lb-row:last-child{border-bottom:none}
+    .lb-row:hover{background:var(--gray-50)}
+    .lb-row.me{background:rgba(37,99,235,.04);border-left:3px solid var(--blue)}
+    .lb-rank-num{font-size:14px;font-weight:800;color:var(--gray-400);width:28px;text-align:center;flex-shrink:0}
+    .lb-av-sm{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+    .lb-name-col .lb-name{font-size:14px;font-weight:600;color:var(--gray-800)}
+    .lb-name-col .lb-sub{font-size:11px;color:var(--gray-400)}
+    .lb-xp-col{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+    .lb-xp-val{font-size:13px;font-weight:700;color:var(--amber)}
+    .lb-xp-bar-wrap{width:80px;height:4px;background:var(--gray-100);border-radius:99px;overflow:hidden}
+    .lb-xp-bar{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:99px}
+    .lb-change{font-size:11px;font-weight:700}
+    .lb-change.up{color:var(--green)}.lb-change.dn{color:var(--red)}.lb-change.same{color:var(--gray-400)}
+
+    /* Side panel */
+    .lb-side{display:flex;flex-direction:column;gap:16px}
+    .side-card{background:#fff;border:1px solid var(--gray-200);border-radius:14px;padding:16px}
+    .side-title{font-size:13px;font-weight:700;color:var(--gray-700);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+    .my-rank-hero{text-align:center;padding:12px 0}
+    .my-rank-num{font-size:48px;font-weight:900;background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .my-rank-label{font-size:13px;color:var(--gray-500);margin-top:2px}
+    .rank-change{font-size:14px;font-weight:700;color:var(--green);margin-top:6px}
+
+    @media(max-width:1100px){.badges-grid{grid-template-columns:repeat(3,1fr)}.lb-layout{grid-template-columns:1fr}}
+    @media(max-width:768px){.sidebar{display:none}.main{margin-left:0}.content{padding:16px}.badges-grid{grid-template-columns:repeat(2,1fr)}.lb-top3{grid-template-columns:1fr}.xp-stats{display:none}}
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-icon">த</div>
+    <span class="logo-text">Tamil<span>AI</span></span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Main</div>
+    <a class="nav-item" href="dashboard.html"><div class="nav-icon">🏠</div> Dashboard</a>
+    <a class="nav-item" href="tutor.html"><div class="nav-icon">🤖</div> AI Tutor</a>
+    <a class="nav-item" href="voice.html"><div class="nav-icon">🎤</div> Voice Tutor</a>
+    <a class="nav-item" href="textbook.html"><div class="nav-icon">📚</div> My Textbooks</a>
+    <div class="nav-label" style="margin-top:8px">Learning</div>
+    <a class="nav-item" href="quiz.html"><div class="nav-icon">❓</div> Quiz Generator</a>
+    <a class="nav-item" href="notes.html"><div class="nav-icon">📝</div> Notes AI</a>
+    <a class="nav-item" href="planner.html"><div class="nav-icon">📅</div> Study Planner</a>
+    <div class="nav-label" style="margin-top:8px">Track</div>
+    <a class="nav-item" href="progress.html"><div class="nav-icon">📈</div> My Progress</a>
+    <a class="nav-item active"><div class="nav-icon">🏆</div> Achievements</a>
+  </nav>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">🏆 Achievements & Leaderboard</div>
+      <div class="topbar-sub" style="font-size:13px;color:var(--gray-400)">உங்கள் சாதனைகளும் class rank-உம்</div>
+    </div>
+    <div style="margin-left:auto">
+      <button onclick="location.href='dashboard.html'" style="padding:8px 16px;border-radius:8px;border:1.5px solid var(--gray-200);background:#fff;font-size:13px;font-weight:600;cursor:pointer;color:var(--gray-700)">← Dashboard</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- XP Hero -->
+    <div class="xp-hero" id="xpHero">
+      <div class="xp-avatar-wrap">
+        <div class="xp-avatar" id="heroAvatar">ஸ்</div>
+        <div class="xp-level-badge" id="heroLevel">8</div>
+      </div>
+      <div class="xp-info">
+        <div class="xp-name" id="heroName">Student</div>
+        <div class="xp-title" id="heroTitle">🌟 Rising Star · Class 10</div>
+        <div class="xp-bar-label">
+          <span>Level <span id="heroLvl">8</span></span>
+          <span><span id="heroXP">2,840</span> / 3,000 XP → Level 9</span>
+        </div>
+        <div class="xp-bar-wrap">
+          <div class="xp-bar-fill" id="xpBarFill" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="xp-stats">
+        <div class="xp-stat"><div class="xp-stat-num">🔥 14</div><div class="xp-stat-label">Day Streak</div></div>
+        <div class="xp-stat"><div class="xp-stat-num">🪙 340</div><div class="xp-stat-label">Coins</div></div>
+        <div class="xp-stat"><div class="xp-stat-num">🎖 12</div><div class="xp-stat-label">Badges</div></div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" onclick="setTab('achievements',this)">🎖 Achievements</div>
+      <div class="tab" onclick="setTab('leaderboard',this)">🏆 Leaderboard</div>
+    </div>
+
+    <!-- ACHIEVEMENTS TAB -->
+    <div id="tabAchievements">
+      <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+        <button class="lb-filter-btn active" onclick="filterBadges('all',this)">All Badges</button>
+        <button class="lb-filter-btn" onclick="filterBadges('earned',this)">✅ Earned</button>
+        <button class="lb-filter-btn" onclick="filterBadges('locked',this)">🔒 Locked</button>
+        <button class="lb-filter-btn" onclick="filterBadges('study',this)">📚 Study</button>
+        <button class="lb-filter-btn" onclick="filterBadges('quiz',this)">❓ Quiz</button>
+        <button class="lb-filter-btn" onclick="filterBadges('streak',this)">🔥 Streak</button>
+      </div>
+      <div class="badges-grid" id="badgesGrid"></div>
+    </div>
+
+    <!-- LEADERBOARD TAB -->
+    <div id="tabLeaderboard" style="display:none">
+      <div class="lb-layout">
+
+        <div class="lb-main-card">
+          <div class="lb-filter-row">
+            <span class="lb-filter-label">Filter:</span>
+            <button class="lb-filter-btn active" onclick="setLbFilter('class',this)">My Class</button>
+            <button class="lb-filter-btn" onclick="setLbFilter('school',this)">My School</button>
+            <button class="lb-filter-btn" onclick="setLbFilter('district',this)">District</button>
+            <button class="lb-filter-btn" onclick="setLbFilter('state',this)">Tamil Nadu</button>
+          </div>
+
+          <!-- Top 3 podium -->
+          <div class="lb-top3" id="lbTop3"></div>
+
+          <!-- Rest of list -->
+          <div class="lb-rest" id="lbRest"></div>
+        </div>
+
+        <div class="lb-side">
+          <div class="side-card">
+            <div class="side-title">📍 My Rank</div>
+            <div class="my-rank-hero">
+              <div class="my-rank-num">#12</div>
+              <div class="my-rank-label">in Class 10</div>
+              <div class="rank-change">↑ +4 positions this week</div>
+            </div>
+          </div>
+
+          <div class="side-card">
+            <div class="side-title">🏅 Medals This Month</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <div style="text-align:center"><div style="font-size:28px">🥇</div><div style="font-size:10px;color:var(--gray-400);margin-top:2px">Quiz King</div></div>
+              <div style="text-align:center"><div style="font-size:28px">🔥</div><div style="font-size:10px;color:var(--gray-400);margin-top:2px">Streak Hero</div></div>
+              <div style="text-align:center"><div style="font-size:28px">📚</div><div style="font-size:10px;color:var(--gray-400);margin-top:2px">Bookworm</div></div>
+            </div>
+          </div>
+
+          <div class="side-card">
+            <div class="side-title">⏱ Next Reward</div>
+            <div style="font-size:13px;color:var(--gray-600);margin-bottom:10px;font-family:var(--font-t)">Level 9-ல் சேர 160 XP மட்டுமே தேவை!</div>
+            <div style="height:8px;background:var(--gray-100);border-radius:99px;overflow:hidden">
+              <div style="width:94%;height:100%;background:linear-gradient(90deg,var(--amber),var(--pink));border-radius:99px"></div>
+            </div>
+            <div style="font-size:11px;color:var(--gray-400);margin-top:6px;text-align:right">2,840 / 3,000 XP</div>
+          </div>
+
+          <div class="side-card">
+            <div class="side-title">💡 How to earn XP</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--gray-600)">Ask AI Tutor</span><span style="font-weight:700;color:var(--amber)">+10 XP</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--gray-600)">Complete Quiz</span><span style="font-weight:700;color:var(--amber)">+10/question</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--gray-600)">Generate Notes</span><span style="font-weight:700;color:var(--amber)">+15 XP</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--gray-600)">Daily Streak</span><span style="font-weight:700;color:var(--amber)">+25 XP/day</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--gray-600)">Perfect Quiz</span><span style="font-weight:700;color:var(--amber)">+50 XP bonus</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const user = JSON.parse(localStorage.getItem('tamilai_user') || '{"name":"Student","xp":2840,"streak":14,"coins":340}');
+
+const BADGES = [
+  // Earned
+  {id:'first_chat',   cat:'study',   icon:'🤖', name:'First Chat',       desc:'Asked your first question to AI Tutor',    xp:50,   earned:true,  new:false, date:'Dec 1'},
+  {id:'quiz_5',       cat:'quiz',    icon:'❓', name:'Quiz Starter',      desc:'Completed 5 quizzes',                      xp:100,  earned:true,  new:false, date:'Dec 5'},
+  {id:'streak_7',     cat:'streak',  icon:'🔥', name:'Week Warrior',      desc:'7-day learning streak',                    xp:150,  earned:true,  new:true,  date:'Dec 10'},
+  {id:'book_upload',  cat:'study',   icon:'📚', name:'Bookworm',          desc:'Uploaded your first textbook',             xp:75,   earned:true,  new:false, date:'Dec 3'},
+  {id:'voice_first',  cat:'study',   icon:'🎤', name:'Voice Learner',     desc:'Used Voice Tutor for the first time',      xp:50,   earned:true,  new:false, date:'Dec 7'},
+  {id:'note_gen',     cat:'study',   icon:'📝', name:'Note Master',       desc:'Generated 10 AI notes',                    xp:100,  earned:true,  new:true,  date:'Dec 12'},
+  {id:'quiz_perfect', cat:'quiz',    icon:'💯', name:'Perfect Score',     desc:'Got 100% in a quiz',                       xp:200,  earned:true,  new:false, date:'Dec 8'},
+  {id:'streak_14',    cat:'streak',  icon:'⚡', name:'Fortnight Fire',    desc:'14-day learning streak',                   xp:250,  earned:true,  new:true,  date:'Today'},
+  {id:'top10',        cat:'study',   icon:'🏆', name:'Top 10 Student',    desc:'Reached top 10 in class leaderboard',      xp:300,  earned:true,  new:false, date:'Dec 11'},
+  {id:'level5',       cat:'study',   icon:'⭐', name:'Level 5 Achiever',  desc:'Reached Level 5',                          xp:100,  earned:true,  new:false, date:'Nov 28'},
+  {id:'tamil_expert', cat:'study',   icon:'📖', name:'Tamil Expert',      desc:'Got 90%+ in 5 Tamil quizzes',              xp:200,  earned:true,  new:false, date:'Dec 6'},
+  {id:'early_bird',   cat:'streak',  icon:'🌅', name:'Early Bird',        desc:'Studied before 7am for 3 days',            xp:75,   earned:true,  new:false, date:'Dec 4'},
+  // Locked (in progress)
+  {id:'streak_30',    cat:'streak',  icon:'🌟', name:'Monthly Master',    desc:'30-day learning streak',                   xp:500,  earned:false, prog:47,   max:100},
+  {id:'quiz_50',      cat:'quiz',    icon:'🎯', name:'Quiz Champion',     desc:'Complete 50 quizzes',                      xp:400,  earned:false, prog:24,   max:50},
+  {id:'top3',         cat:'study',   icon:'👑', name:'Class Topper',      desc:'Reach top 3 in class leaderboard',         xp:500,  earned:false, prog:12,   max:3},
+  {id:'subject_all',  cat:'study',   icon:'🌈', name:'All-Rounder',       desc:'Score 80%+ in all 6 subjects',             xp:600,  earned:false, prog:4,    max:6},
+  {id:'streak_100',   cat:'streak',  icon:'🔆', name:'Century Learner',   desc:'100-day learning streak',                  xp:1000, earned:false, prog:14,   max:100},
+  {id:'quiz_perfect5',cat:'quiz',    icon:'🎖', name:'Perfectionist',     desc:'Get perfect scores in 5 quizzes',          xp:500,  earned:false, prog:1,    max:5},
+  {id:'level10',      cat:'study',   icon:'💎', name:'Diamond Scholar',   desc:'Reach Level 10',                           xp:300,  earned:false, prog:8,    max:10},
+  {id:'books_10',     cat:'study',   icon:'📗', name:'Library Builder',   desc:'Upload 10 textbooks',                      xp:200,  earned:false, prog:2,    max:10},
+];
+
+const LEADERBOARD = [
+  {rank:1,  name:'Priya Lakshmi',  school:'GHSS Madurai',   xp:3840, av:'P', color:'#7C3AED', change:0},
+  {rank:2,  name:'Ravi Kumar',     school:'GHS Chennai',    xp:3640, av:'R', color:'#2563EB', change:+1},
+  {rank:3,  name:'Kavya Selvam',   school:'GHSS Coimbatore',xp:3410, av:'K', color:'#06B6D4', change:-1},
+  {rank:4,  name:'Arjun Raj',      school:'GHS Trichy',     xp:3200, av:'A', color:'#10B981', change:+2},
+  {rank:5,  name:'Meena Devi',     school:'GHSS Salem',     xp:3100, av:'M', color:'#EC4899', change:0},
+  {rank:6,  name:'Suresh P.',      school:'GHS Erode',      xp:2980, av:'S', color:'#F59E0B', change:-2},
+  {rank:7,  name:'Deepa K.',       school:'GHSS Vellore',   xp:2860, av:'D', color:'#EF4444', change:+3},
+  {rank:8,  name:'Vijay M.',       school:'GHS Tirunelveli',xp:2780, av:'V', color:'#8B5CF6', change:0},
+  {rank:9,  name:'Anitha R.',      school:'GHSS Thanjavur', xp:2720, av:'A', color:'#14B8A6', change:+1},
+  {rank:10, name:'Karthik S.',     school:'GHS Tiruppur',   xp:2660, av:'K', color:'#F97316', change:-1},
+  {rank:11, name:'Nithya B.',      school:'GHSS Madurai',   xp:2600, av:'N', color:'#06B6D4', change:+2},
+  {rank:12, name:'You',            school:'Your School',    xp:2840, av:'👤',color:'#2563EB', change:+4, me:true},
+  {rank:13, name:'Pradeep V.',     school:'GHS Coimbatore', xp:2500, av:'P', color:'#7C3AED', change:-1},
+];
+
+// ── XP Hero ─────────────────────────────────────────────────
+function initHero() {
+  const name = user.name || 'Student';
+  const xp   = user.xp   || 2840;
+  const lvl  = Math.floor(xp/500) + 1;
+  const xpInLvl  = xp % 500;
+  const xpToNext = 500;
+  const pct  = Math.round(xpInLvl/xpToNext*100);
+  const titles = ['','Curious Learner','Rising Star','Knowledge Seeker','Quiz Master','Subject Expert','Scholar','Topper','Champion','Elite','Legend'];
+
+  document.getElementById('heroAvatar').textContent = name[0] || 'ஸ்';
+  document.getElementById('heroLevel').textContent  = lvl;
+  document.getElementById('heroName').textContent   = name;
+  document.getElementById('heroTitle').textContent  = `🌟 ${titles[Math.min(lvl,10)]} · ${user.class_grade || 'Class 10'}`;
+  document.getElementById('heroLvl').textContent    = lvl;
+  document.getElementById('heroXP').textContent     = xp.toLocaleString();
+  setTimeout(() => document.getElementById('xpBarFill').style.width = pct+'%', 300);
+}
+
+// ── Tabs ─────────────────────────────────────────────────────
+function setTab(t, el) {
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tabAchievements').style.display = t==='achievements' ? 'block' : 'none';
+  document.getElementById('tabLeaderboard').style.display  = t==='leaderboard'  ? 'block' : 'none';
+}
+
+// ── Badges ───────────────────────────────────────────────────
+let currentFilter = 'all';
+function filterBadges(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.lb-filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderBadges();
+}
+
+function renderBadges() {
+  let list = BADGES;
+  if (currentFilter === 'earned') list = list.filter(b => b.earned);
+  if (currentFilter === 'locked') list = list.filter(b => !b.earned);
+  if (['study','quiz','streak'].includes(currentFilter)) list = list.filter(b => b.cat===currentFilter);
+
+  const el = document.getElementById('badgesGrid');
+  el.innerHTML = list.map(b => `
+    <div class="badge-card ${b.earned?'':'locked'} ${b.new?'new':''}">
+      <span class="badge-icon">${b.icon}</span>
+      <div class="badge-name">${b.name}</div>
+      <div class="badge-desc">${b.desc}</div>
+      <div class="badge-xp">⚡ +${b.xp} XP</div>
+      ${b.earned
+        ? `<div class="badge-earned">✓ Earned ${b.date}</div>`
+        : b.prog !== undefined
+          ? `<div class="badge-progress">
+               <div style="font-size:10px;color:var(--gray-400)">${b.prog}/${b.max}</div>
+               <div class="bp-bar"><div class="bp-fill" style="width:${Math.round(b.prog/b.max*100)}%"></div></div>
+               <div class="bp-label">${Math.round(b.prog/b.max*100)}%</div>
+             </div>`
+          : '<div style="font-size:11px;color:var(--gray-400);margin-top:6px">🔒 Locked</div>'
+      }
+    </div>`).join('');
+}
+
+// ── Leaderboard ───────────────────────────────────────────────
+function setLbFilter(f, el) {
+  document.querySelectorAll('.lb-filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderLeaderboard();
+}
+
+function renderLeaderboard() {
+  const top3  = LEADERBOARD.filter(p => p.rank <= 3);
+  const rest  = LEADERBOARD.filter(p => p.rank > 3);
+  const sizes = [64, 80, 64]; // 2nd, 1st, 3rd avatar sizes
+  const order = [top3[1], top3[0], top3[2]]; // visual order: 2nd, 1st, 3rd
+
+  document.getElementById('lbTop3').innerHTML = order.filter(Boolean).map((p,i) => {
+    const isFirst = i===1;
+    const size = sizes[i];
+    return `
+      <div class="lb-top-item">
+        ${isFirst ? '<div class="lb-crown">👑</div>' : '<div style="height:28px"></div>'}
+        <div class="lb-top-av" data-rank="${p.rank}" style="width:${size}px;height:${size}px;font-size:${size*0.3}px;background:${p.color};border:${isFirst?'3px solid var(--amber)':'2px solid var(--gray-200)'}">
+          ${p.av}
+        </div>
+        <div class="lb-top-name">${p.name}</div>
+        <div class="lb-top-xp">⚡ ${p.xp.toLocaleString()}</div>
+        <div class="lb-top-school">${p.school}</div>
+      </div>`;
+  }).join('');
+
+  const maxXP = LEADERBOARD[0].xp;
+  document.getElementById('lbRest').innerHTML = rest.map(p => {
+    const changeIcon = p.change>0?`<span class="lb-change up">↑ +${p.change}</span>`:p.change<0?`<span class="lb-change dn">↓ ${Math.abs(p.change)}</span>`:'<span class="lb-change same">−</span>';
+    return `
+      <div class="lb-row${p.me?' me':''}">
+        <div class="lb-rank-num" style="color:${p.rank<=5?'var(--amber)':'var(--gray-400)'}">${p.rank}</div>
+        <div class="lb-av-sm" style="background:${p.color}">${p.av}</div>
+        <div class="lb-name-col">
+          <div class="lb-name">${p.name}${p.me?' <span style="font-size:11px;color:var(--blue)">(You)</span>':''}</div>
+          <div class="lb-sub">${p.school}</div>
+        </div>
+        ${changeIcon}
+        <div class="lb-xp-col">
+          <div class="lb-xp-val">⚡ ${p.xp.toLocaleString()}</div>
+          <div class="lb-xp-bar-wrap"><div class="lb-xp-bar" style="width:${Math.round(p.xp/maxXP*100)}%"></div></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+initHero();
+renderBadges();
+renderLeaderboard();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/logout.js"></script>
+<script>
+(async function () {
+
+    const { data } = await supabaseClient.auth.getSession();
+
+    if (!data.session) {
+        window.location.href = "auth.html";
+    }
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,640 @@
+
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TamilAI – Textbook Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --blue:#2563EB;--purple:#7C3AED;--cyan:#06B6D4;
+      --green:#10B981;--red:#EF4444;--amber:#F59E0B;
+      --gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;
+      --gray-400:#94A3B8;--gray-500:#64748B;--gray-600:#475569;
+      --gray-700:#334155;--gray-800:#1E293B;--gray-900:#0F172A;
+      --sidebar-w:260px;
+      --font:'Inter',sans-serif;--font-t:'Noto Sans Tamil','Inter',sans-serif;
+    }
+    html,body{height:100%}
+    body{font-family:var(--font);background:var(--gray-50);display:flex;-webkit-font-smoothing:antialiased}
+ 
+    /* Shared sidebar */
+    .sidebar{width:var(--sidebar-w);flex-shrink:0;background:#fff;border-right:1px solid var(--gray-200);display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;z-index:100}
+    .sidebar-header{padding:20px;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;gap:10px}
+    .logo-icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:17px;color:#fff;font-weight:800;font-family:var(--font-t)}
+    .logo-text{font-size:17px;font-weight:700;color:var(--gray-900)}
+    .logo-text span{background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .sidebar-nav{flex:1;padding:12px;overflow-y:auto}
+    .nav-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray-400);padding:8px 8px 6px}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;font-size:14px;font-weight:500;color:var(--gray-600);cursor:pointer;margin-bottom:2px;text-decoration:none;transition:background .15s,color .15s}
+    .nav-item:hover{background:var(--gray-50);color:var(--gray-900)}
+    .nav-item.active{background:rgba(37,99,235,.08);color:var(--blue);font-weight:600}
+    .nav-icon{width:28px;height:28px;border-radius:6px;background:var(--gray-200);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+ 
+    /* Main */
+    .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
+    .topbar{background:#fff;border-bottom:1px solid var(--gray-200);padding:0 32px;height:64px;display:flex;align-items:center;gap:16px;flex-shrink:0}
+    .topbar-title{font-size:18px;font-weight:700;color:var(--gray-900)}
+    .topbar-sub{font-size:13px;color:var(--gray-400)}
+ 
+    /* Layout: two columns */
+    .page-body{display:grid;grid-template-columns:320px 1fr;height:calc(100vh - 64px);overflow:hidden}
+ 
+    /* ── LEFT COLUMN ─────────────────────────────────────── */
+    .left-col{border-right:1px solid var(--gray-200);background:#fff;display:flex;flex-direction:column;overflow:hidden}
+    .left-section{padding:20px;border-bottom:1px solid var(--gray-100)}
+    .section-title{font-size:13px;font-weight:700;color:var(--gray-700);margin-bottom:14px;display:flex;align-items:center;gap:6px}
+ 
+    /* Upload zone */
+    .upload-zone{
+      border:2px dashed var(--gray-300);border-radius:14px;padding:28px 20px;
+      text-align:center;cursor:pointer;transition:all .2s;
+      background:var(--gray-50);position:relative;overflow:hidden;
+    }
+    .upload-zone:hover,.upload-zone.drag{border-color:var(--blue);background:rgba(37,99,235,.03)}
+    .upload-zone.drag{border-color:var(--blue);background:rgba(37,99,235,.06);transform:scale(1.01)}
+    .upload-icon{font-size:36px;display:block;margin-bottom:10px}
+    .upload-text{font-size:14px;font-weight:600;color:var(--gray-700);margin-bottom:4px}
+    .upload-sub{font-size:12px;color:var(--gray-400)}
+    #fileInput{position:absolute;inset:0;opacity:0;cursor:pointer}
+ 
+    /* Upload progress */
+    .upload-progress{display:none;margin-top:14px}
+    .uprog-bar{height:6px;background:var(--gray-200);border-radius:99px;overflow:hidden;margin-bottom:6px}
+    .uprog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:99px;transition:width .3s;width:0}
+    .uprog-text{font-size:12px;color:var(--gray-500);text-align:center}
+ 
+    /* Book list */
+    .book-list{flex:1;overflow-y:auto;padding:12px}
+    .book-list::-webkit-scrollbar{width:3px}
+    .book-list::-webkit-scrollbar-thumb{background:var(--gray-200);border-radius:99px}
+    .book-empty{padding:32px 16px;text-align:center;color:var(--gray-400);font-size:13px}
+ 
+    .book-card{
+      display:flex;align-items:flex-start;gap:12px;padding:12px 14px;
+      border-radius:12px;border:1.5px solid var(--gray-200);
+      cursor:pointer;margin-bottom:8px;transition:all .18s;background:#fff;
+    }
+    .book-card:hover{border-color:var(--blue);background:rgba(37,99,235,.02);transform:translateX(2px)}
+    .book-card.active{border-color:var(--blue);background:rgba(37,99,235,.06)}
+    .book-icon{font-size:24px;flex-shrink:0;margin-top:2px}
+    .book-title{font-size:13px;font-weight:700;color:var(--gray-900);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+    .book-meta{font-size:11px;color:var(--gray-400)}
+    .book-badge{margin-left:auto;font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px;background:rgba(16,185,129,.1);color:#059669;white-space:nowrap}
+    .book-actions{display:flex;gap:4px;margin-top:6px}
+    .book-action{font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--gray-200);background:#fff;color:var(--gray-500);cursor:pointer;transition:all .15s}
+    .book-action:hover{border-color:var(--blue);color:var(--blue)}
+    .book-action.delete:hover{border-color:var(--red);color:var(--red)}
+ 
+    /* ── RIGHT COLUMN: Chat ──────────────────────────────── */
+    .right-col{display:flex;flex-direction:column;overflow:hidden;background:var(--gray-50)}
+ 
+    /* No book selected */
+    .no-book{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;gap:16px}
+    .no-book-icon{font-size:64px}
+    .no-book-title{font-size:22px;font-weight:800;color:var(--gray-900)}
+    .no-book-sub{font-size:14px;color:var(--gray-400);font-family:var(--font-t);line-height:1.7;max-width:380px}
+ 
+    /* Active chat */
+    .chat-header{background:#fff;border-bottom:1px solid var(--gray-200);padding:14px 24px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+    .chat-book-icon{font-size:28px}
+    .chat-book-name{font-size:15px;font-weight:700;color:var(--gray-900)}
+    .chat-book-meta{font-size:12px;color:var(--gray-400)}
+    .chat-header-actions{margin-left:auto;display:flex;gap:8px}
+    .ch-btn{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1.5px solid var(--gray-200);background:#fff;color:var(--gray-600);cursor:pointer;transition:all .18s}
+    .ch-btn:hover{border-color:var(--blue);color:var(--blue)}
+ 
+    /* Messages */
+    .chat-msgs{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px}
+    .chat-msgs::-webkit-scrollbar{width:4px}
+    .chat-msgs::-webkit-scrollbar-thumb{background:var(--gray-200);border-radius:99px}
+ 
+    .msg-row{display:flex;gap:10px;align-items:flex-start;animation:msgIn .3s ease}
+    .msg-row.user{flex-direction:row-reverse}
+    @keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .msg-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+    .av-ai{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff}
+    .av-user{background:var(--gray-200);color:var(--gray-600)}
+    .msg-bubble{padding:12px 16px;border-radius:14px;font-size:14px;line-height:1.75;max-width:78%}
+    .bubble-ai{background:#fff;border:1px solid var(--gray-200);color:var(--gray-800);border-top-left-radius:4px;font-family:var(--font-t)}
+    .bubble-user{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;border-top-right-radius:4px;font-family:var(--font-t)}
+    .msg-time{font-size:10px;color:var(--gray-400);margin-top:3px;padding:0 2px}
+    .msg-row.user .msg-time{text-align:right}
+ 
+    /* Source chips */
+    .source-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+    .source-chip{font-size:11px;padding:3px 10px;border-radius:99px;background:rgba(37,99,235,.07);border:1px solid rgba(37,99,235,.15);color:var(--blue);font-weight:600}
+ 
+    /* Typing */
+    .typing-bub{background:#fff;border:1px solid var(--gray-200);border-radius:14px;border-top-left-radius:4px;padding:12px 16px;display:flex;gap:5px;align-items:center}
+    .t-dot{width:7px;height:7px;border-radius:50%;background:var(--gray-300);animation:tdot 1.3s infinite}
+    .t-dot:nth-child(2){animation-delay:.15s}.t-dot:nth-child(3){animation-delay:.3s}
+    @keyframes tdot{0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(-5px);opacity:1}}
+ 
+    /* Suggested questions */
+    .suggested-row{display:flex;flex-wrap:wrap;gap:8px;padding:12px 24px}
+    .sug-q{padding:7px 14px;border-radius:99px;font-size:12px;font-weight:600;border:1.5px solid var(--gray-200);background:#fff;color:var(--gray-600);cursor:pointer;transition:all .18s;font-family:var(--font-t)}
+    .sug-q:hover{border-color:var(--blue);color:var(--blue);background:rgba(37,99,235,.04)}
+ 
+    /* Input */
+    .chat-input-area{padding:14px 24px 18px;background:#fff;border-top:1px solid var(--gray-200);flex-shrink:0}
+    .input-box{display:flex;align-items:flex-end;gap:10px;background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:14px;padding:10px 14px;transition:border-color .2s,box-shadow .2s}
+    .input-box:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1);background:#fff}
+    textarea#ragInput{flex:1;border:none;outline:none;resize:none;font-size:14px;font-family:var(--font-t);background:transparent;color:var(--gray-800);line-height:1.6;min-height:22px;max-height:100px}
+    textarea#ragInput::placeholder{color:var(--gray-400)}
+    .send-btn{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .2s,transform .2s;box-shadow:0 2px 10px rgba(37,99,235,.3);flex-shrink:0}
+    .send-btn:hover{opacity:.9;transform:scale(1.05)}
+    .send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+    .input-hint{font-size:11px;color:var(--gray-400);margin-top:7px;text-align:center}
+ 
+    @media(max-width:900px){.page-body{grid-template-columns:1fr}.left-col{display:none}}
+    @media(max-width:768px){.sidebar{display:none}.main{margin-left:0}}
+  </style>
+</head>
+<body>
+ 
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-icon">த</div>
+    <span class="logo-text">Tamil<span>AI</span></span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Main</div>
+    <a class="nav-item" href="dashboard.html"><div class="nav-icon">🏠</div> Dashboard</a>
+    <a class="nav-item" href="tutor.html"><div class="nav-icon">🤖</div> AI Tutor</a>
+    <a class="nav-item" href="voice.html"><div class="nav-icon">🎤</div> Voice Tutor</a>
+    <a class="nav-item active"><div class="nav-icon">📚</div> My Textbooks</a>
+    <div class="nav-label" style="margin-top:8px">Learning</div>
+    <a class="nav-item" href="quiz.html"><div class="nav-icon">❓</div> Quiz Generator</a>
+    <a class="nav-item" href="notes.html"><div class="nav-icon">📝</div> Notes AI</a>
+    <a class="nav-item" href="planner.html"><div class="nav-icon">📅</div> Study Planner</a>
+    <div class="nav-label" style="margin-top:8px">Track</div>
+    <a class="nav-item" href="progress.html"><div class="nav-icon">📈</div> My Progress</a>
+    <a class="nav-item" href="#"><div class="nav-icon">🏆</div> Leaderboard</a>
+  </nav>
+</aside>
+ 
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">📚 My Textbooks</div>
+      <div class="topbar-sub">Upload & chat with your Samacheer books</div>
+    </div>
+    <div style="margin-left:auto">
+      <button onclick="location.href='dashboard.html'" style="padding:8px 16px;border-radius:8px;border:1.5px solid var(--gray-200);background:#fff;font-size:13px;font-weight:600;cursor:pointer;color:var(--gray-700)">← Dashboard</button>
+    </div>
+  </div>
+ 
+  <div class="page-body">
+ 
+    <!-- LEFT: Upload + Book List -->
+    <div class="left-col">
+      <div class="left-section">
+        <div class="section-title">📤 Upload Textbook</div>
+        <div class="upload-zone" id="uploadZone"
+          ondragover="handleDrag(event,true)" ondragleave="handleDrag(event,false)"
+          ondrop="handleDrop(event)" onclick="document.getElementById('fileInput').click()">
+          <input type="file" id="fileInput" accept=".pdf" onchange="handleFile(this.files[0])"/>
+          <span class="upload-icon">📄</span>
+          <div class="upload-text">Drop PDF here or click to upload</div>
+          <div class="upload-sub">Samacheer Kalvi, NCERT, or any textbook PDF</div>
+        </div>
+ 
+        <div class="upload-progress" id="uploadProgress">
+          <div class="uprog-bar"><div class="uprog-fill" id="uprogFill"></div></div>
+          <div class="uprog-text" id="uprogText">Uploading…</div>
+        </div>
+ 
+        <div style="margin-top:12px">
+          <input class="form-input" id="bookTitle" placeholder="Book title (optional)"
+            style="width:100%;padding:9px 12px;border:1.5px solid var(--gray-200);border-radius:9px;font-size:13px;font-family:var(--font);color:var(--gray-800);outline:none;margin-bottom:8px"/>
+          <select id="bookSubject" style="width:100%;padding:9px 12px;border:1.5px solid var(--gray-200);border-radius:9px;font-size:13px;font-family:var(--font);color:var(--gray-800);outline:none">
+            <option value="Science">🔬 அறிவியல்</option>
+            <option value="Maths">📐 கணிதம்</option>
+            <option value="Social">🌍 சமூகவியல்</option>
+            <option value="Tamil">📖 தமிழ்</option>
+            <option value="Physics">⚛️ Physics</option>
+            <option value="Chemistry">🧪 Chemistry</option>
+            <option value="Biology">🧬 Biology</option>
+            <option value="English">🔤 English</option>
+          </select>
+        </div>
+      </div>
+ 
+      <div class="section-title" style="padding:16px 20px 4px">📖 My Books</div>
+      <div class="book-list" id="bookList">
+        <div class="book-empty">No books yet.<br/>Upload a PDF to get started!</div>
+      </div>
+    </div>
+ 
+    <!-- RIGHT: Chat -->
+    <div class="right-col" id="rightCol">
+ 
+      <!-- No book selected -->
+      <div class="no-book" id="noBooksState">
+        <div class="no-book-icon">📚</div>
+        <div class="no-book-title">உங்கள் பாடப்புத்தகத்துடன் பேசுங்கள்!</div>
+        <div class="no-book-sub">
+          PDF upload செய்யுங்கள் — AI உங்கள் புத்தகத்தை படித்து, கேள்விகளுக்கு நேரடியாக அந்த புத்தகத்திலிருந்து பதில் சொல்லும்.
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px">
+          <div style="padding:10px 16px;border-radius:10px;background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.2);font-size:13px;color:var(--blue);font-weight:600">📄 PDF Upload</div>
+          <div style="padding:10px 16px;border-radius:10px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);font-size:13px;color:var(--purple);font-weight:600">🧠 AI Indexing</div>
+          <div style="padding:10px 16px;border-radius:10px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);font-size:13px;color:var(--green);font-weight:600">💬 Tamil Chat</div>
+        </div>
+      </div>
+ 
+      <!-- Active book chat (hidden initially) -->
+      <div id="chatState" style="display:none;flex-direction:column;height:100%;overflow:hidden">
+ 
+        <div class="chat-header">
+          <div class="chat-book-icon" id="chatBookIcon">📘</div>
+          <div>
+            <div class="chat-book-name" id="chatBookName">Book Title</div>
+            <div class="chat-book-meta" id="chatBookMeta">Loading…</div>
+          </div>
+          <div class="chat-header-actions">
+            <button class="ch-btn" onclick="generateQuizFromBook()">❓ Generate Quiz</button>
+            <button class="ch-btn" onclick="generateNotesFromBook()">📝 Generate Notes</button>
+            <button class="ch-btn" onclick="clearBookChat()">🗑 Clear</button>
+          </div>
+        </div>
+ 
+        <div class="chat-msgs" id="ragMessages"></div>
+ 
+        <div class="suggested-row" id="suggestedRow">
+          <span class="sug-q" onclick="askSuggested(this)">இந்த அத்தியாயத்தின் முக்கிய கருத்துக்கள் என்ன?</span>
+          <span class="sug-q" onclick="askSuggested(this)">இந்த தலைப்பை சுருக்கமாக விளக்குங்கள்</span>
+          <span class="sug-q" onclick="askSuggested(this)">முக்கியமான வரையறைகள் என்னென்ன?</span>
+          <span class="sug-q" onclick="askSuggested(this)">தேர்வுக்கு முக்கியமான கேள்விகள் எவை?</span>
+        </div>
+ 
+        <div class="chat-input-area">
+          <div class="input-box">
+            <textarea id="ragInput" rows="1" placeholder="இந்த புத்தகத்தில் இருந்து கேளுங்கள்… (Ask from this book)"></textarea>
+            <button class="send-btn" id="ragSendBtn" onclick="sendRagMessage()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+          <div class="input-hint">Answers come directly from your uploaded book · Powered by RAG + Gemini</div>
+        </div>
+ 
+      </div>
+    </div>
+ 
+  </div>
+</div>
+ 
+<script>
+const API = 'http://localhost:5000/api';
+const token = localStorage.getItem('tamilai_token');
+let books = [];
+let activeBook = null;
+let isLoading = false;
+ 
+// ── Local book storage (demo mode when no backend) ──────────
+const LOCAL_KEY = 'tamilai_books';
+ 
+function loadLocalBooks() {
+  return JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]');
+}
+ 
+function saveLocalBook(book) {
+  const all = loadLocalBooks();
+  all.unshift(book);
+  localStorage.setItem(LOCAL_KEY, JSON.stringify(all.slice(0, 20)));
+}
+ 
+// ── Drag & drop ─────────────────────────────────────────────
+function handleDrag(e, entering) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.toggle('drag', entering);
+}
+ 
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file && file.name.endsWith('.pdf')) handleFile(file);
+  else showToast('Only PDF files are supported', 'error');
+}
+ 
+// ── File upload ──────────────────────────────────────────────
+async function handleFile(file) {
+  if (!file) return;
+  if (!file.name.endsWith('.pdf')) { showToast('Only PDF files supported', 'error'); return; }
+  if (file.size > 50 * 1024 * 1024) { showToast('File too large (max 50MB)', 'error'); return; }
+ 
+  const title   = document.getElementById('bookTitle').value.trim() || file.name.replace('.pdf','');
+  const subject = document.getElementById('bookSubject').value;
+ 
+  showUploadProgress(0, 'Reading PDF…');
+ 
+  try {
+    // Try real API upload
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('title', title);
+    formData.append('subject', subject);
+ 
+    // Simulate progress
+    let prog = 10;
+    const progTimer = setInterval(() => {
+      prog = Math.min(prog + Math.random() * 15, 85);
+      showUploadProgress(prog, prog < 40 ? 'Extracting text…' : prog < 70 ? 'Building AI index…' : 'Almost done…');
+    }, 400);
+ 
+    const res = await fetch(`${API}/upload/book`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token||''}` },
+      body: formData,
+    });
+ 
+    clearInterval(progTimer);
+ 
+    if (res.ok) {
+      const data = await res.json();
+      showUploadProgress(100, `✅ Indexed ${data.pages} pages!`);
+      setTimeout(hideUploadProgress, 1500);
+      await fetchBooks();
+      showToast(`📚 "${title}" indexed successfully!`, 'success');
+    } else {
+      throw new Error('API error');
+    }
+  } catch {
+    // Demo mode: simulate processing
+    let prog = 0;
+    const timer = setInterval(() => {
+      prog = Math.min(prog + Math.random() * 20, 95);
+      const labels = ['Reading PDF…','Extracting text…','Chunking content…','Building embeddings…','Saving index…'];
+      showUploadProgress(prog, labels[Math.floor(prog/20)]);
+    }, 300);
+ 
+    await new Promise(r => setTimeout(r, 2500));
+    clearInterval(timer);
+    showUploadProgress(100, '✅ Book indexed (demo mode)!');
+ 
+    const demoBook = {
+      id: Date.now(), title, subject,
+      pages: Math.floor(100 + Math.random() * 300),
+      created_at: new Date().toISOString(),
+      demo: true,
+    };
+    saveLocalBook(demoBook);
+    setTimeout(() => { hideUploadProgress(); renderBooks([...loadLocalBooks()]); showToast(`📚 "${title}" ready to chat!`, 'success'); }, 1000);
+  }
+ 
+  document.getElementById('bookTitle').value = '';
+  document.getElementById('fileInput').value = '';
+}
+ 
+function showUploadProgress(pct, text) {
+  const el = document.getElementById('uploadProgress');
+  el.style.display = 'block';
+  document.getElementById('uprogFill').style.width = pct + '%';
+  document.getElementById('uprogText').textContent = text;
+}
+function hideUploadProgress() {
+  document.getElementById('uploadProgress').style.display = 'none';
+  document.getElementById('uprogFill').style.width = '0';
+}
+ 
+// ── Book list ────────────────────────────────────────────────
+async function fetchBooks() {
+  try {
+    const res = await fetch(`${API}/upload/books`, { headers:{'Authorization':`Bearer ${token||''}`} });
+    if (res.ok) {
+      books = await res.json();
+      renderBooks(books);
+      return;
+    }
+  } catch {}
+  books = loadLocalBooks();
+  renderBooks(books);
+}
+ 
+function renderBooks(list) {
+  const el = document.getElementById('bookList');
+  if (!list.length) {
+    el.innerHTML = '<div class="book-empty">No books yet.<br/>Upload a PDF to get started!</div>';
+    return;
+  }
+  const subjectIcons = { Science:'🔬', Maths:'📐', Social:'🌍', Tamil:'📖', Physics:'⚛️', Chemistry:'🧪', Biology:'🧬', English:'🔤' };
+  el.innerHTML = list.map(b => `
+    <div class="book-card ${activeBook?.id === b.id ? 'active' : ''}" onclick="selectBook(${b.id})" id="book-${b.id}">
+      <span class="book-icon">${subjectIcons[b.subject] || '📚'}</span>
+      <div style="flex:1;min-width:0">
+        <div class="book-title">${b.title}</div>
+        <div class="book-meta">${b.subject} · ${b.pages || '?'} pages · ${formatDate(b.created_at)}</div>
+        <div class="book-actions">
+          <span class="book-action" onclick="event.stopPropagation();generateQuizFromBookId(${b.id})">❓ Quiz</span>
+          <span class="book-action" onclick="event.stopPropagation();generateNotesFromBookId(${b.id})">📝 Notes</span>
+          <span class="book-action delete" onclick="event.stopPropagation();deleteBook(${b.id})">🗑</span>
+        </div>
+      </div>
+      <span class="book-badge">✓ Ready</span>
+    </div>`).join('');
+}
+ 
+function selectBook(id) {
+  activeBook = books.find(b => b.id === id);
+  if (!activeBook) return;
+ 
+  document.querySelectorAll('.book-card').forEach(c => c.classList.remove('active'));
+  document.getElementById(`book-${id}`)?.classList.add('active');
+ 
+  // Show chat
+  document.getElementById('noBooksState').style.display = 'none';
+  const chatEl = document.getElementById('chatState');
+  chatEl.style.display = 'flex';
+ 
+  const subjectIcons = { Science:'🔬', Maths:'📐', Social:'🌍', Tamil:'📖', Physics:'⚛️', Chemistry:'🧪', Biology:'🧬', English:'🔤' };
+  document.getElementById('chatBookIcon').textContent = subjectIcons[activeBook.subject] || '📚';
+  document.getElementById('chatBookName').textContent = activeBook.title;
+  document.getElementById('chatBookMeta').textContent = `${activeBook.subject} · ${activeBook.pages || '?'} pages · RAG enabled`;
+ 
+  document.getElementById('ragMessages').innerHTML = '';
+  addWelcomeMessage();
+}
+ 
+function addWelcomeMessage() {
+  const el = document.getElementById('ragMessages');
+  el.innerHTML = `
+    <div class="msg-row">
+      <div class="msg-av av-ai">AI</div>
+      <div>
+        <div class="msg-bubble bubble-ai">
+          📚 <strong>"${activeBook.title}"</strong> தயாராக உள்ளது!<br/><br/>
+          இந்த புத்தகத்திலிருந்து எந்த கேள்வியும் கேளுங்கள். நான் <strong>நேரடியாக இந்த புத்தகத்திலிருந்து மட்டும்</strong> பதில் சொல்வேன்.<br/><br/>
+          தமிழிலோ ஆங்கிலத்திலோ கேளுங்கள் — பதில் தமிழில் வரும்! 🎯
+        </div>
+        <div class="msg-time">${now()}</div>
+      </div>
+    </div>`;
+}
+ 
+async function sendRagMessage() {
+  const input = document.getElementById('ragInput');
+  const query = input.value.trim();
+  if (!query || isLoading || !activeBook) return;
+ 
+  input.value = '';
+  input.style.height = 'auto';
+  isLoading = true;
+  document.getElementById('ragSendBtn').disabled = true;
+  document.getElementById('suggestedRow').style.display = 'none';
+ 
+  addRagMessage('user', query);
+  addTyping();
+ 
+  try {
+    const res = await fetch(`${API}/chat/ask`, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${token||''}` },
+      body: JSON.stringify({
+    message: query,
+    subject: activeBook.subject
+})
+    });
+ 
+    removeTyping();
+ 
+    if (res.ok) {
+      const data = await res.json();
+      addRagMessage(
+    "assistant",
+    data.response
+);
+    } else {
+      addRagMessage('assistant', getDemoAnswer(query, activeBook));
+    }
+  } catch {
+    removeTyping();
+    await new Promise(r => setTimeout(r, 1200));
+    addRagMessage('assistant', getDemoAnswer(query, activeBook));
+  }
+ 
+  isLoading = false;
+  document.getElementById('ragSendBtn').disabled = false;
+  document.getElementById('ragInput').focus();
+}
+ 
+function getDemoAnswer(query, book) {
+  return `📖 **"${book.title}"** இலிருந்து:\n\n` +
+    `"${query}" என்ற கேள்விக்கு இந்த புத்தகத்தின் ${Math.floor(Math.random()*100)+1}வது பக்கத்தில் விடை உள்ளது.\n\n` +
+    `**Demo Mode இயங்குகிறது** — Backend API இணைக்கப்பட்டவுடன், உங்கள் புத்தகத்திலிருந்து நேரடியாக சரியான பதில் கிடைக்கும்.\n\n` +
+    `RAG (Retrieval-Augmented Generation) தொழில்நுட்பம் பயன்படுத்தி உங்கள் PDF-இல் இருந்து மட்டுமே பதில் எடுக்கப்படும். 🔍`;
+}
+ 
+function addRagMessage(role, content, sources) {
+  const el = document.getElementById('ragMessages');
+  const isUser = role === 'user';
+  const sourcesHTML = sources?.length ? `
+    <div class="source-chips">
+      ${sources.map(s => `<span class="source-chip">📄 Page ${s.page}</span>`).join('')}
+    </div>` : '';
+ 
+  const div = document.createElement('div');
+  div.className = `msg-row ${isUser ? 'user' : ''}`;
+  div.innerHTML = `
+    ${isUser ? '' : '<div class="msg-av av-ai">AI</div>'}
+    <div>
+      <div class="msg-bubble ${isUser ? 'bubble-user' : 'bubble-ai'}">${formatMD(content)}</div>
+      ${sourcesHTML}
+      <div class="msg-time">${now()}</div>
+    </div>
+    ${isUser ? '<div class="msg-av av-user">👤</div>' : ''}`;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+ 
+function addTyping() {
+  const el = document.getElementById('ragMessages');
+  const div = document.createElement('div');
+  div.className = 'msg-row'; div.id = 'ragTyping';
+  div.innerHTML = `<div class="msg-av av-ai">AI</div><div class="typing-bub"><div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div></div>`;
+  el.appendChild(div); el.scrollTop = el.scrollHeight;
+}
+function removeTyping() { document.getElementById('ragTyping')?.remove(); }
+ 
+function askSuggested(el) {
+  document.getElementById('ragInput').value = el.textContent.trim();
+  sendRagMessage();
+}
+ 
+async function deleteBook(id) {
+  if (!confirm('Delete this book?')) return;
+  try {
+    await fetch(`${API}/upload/${id}`, { method:'DELETE', headers:{'Authorization':`Bearer ${token||''}`} });
+  } catch {}
+  books = books.filter(b => b.id !== id);
+  const local = loadLocalBooks().filter(b => b.id !== id);
+  localStorage.setItem(LOCAL_KEY, JSON.stringify(local));
+  if (activeBook?.id === id) {
+    activeBook = null;
+    document.getElementById('noBooksState').style.display = 'flex';
+    document.getElementById('chatState').style.display = 'none';
+  }
+  renderBooks([...books, ...local.filter(l => !books.find(b => b.id === l.id))]);
+}
+ 
+function clearBookChat() { document.getElementById('ragMessages').innerHTML = ''; addWelcomeMessage(); }
+function generateQuizFromBook() { if(activeBook) location.href=`quiz.html?topic=${encodeURIComponent(activeBook.title)}`; }
+function generateNotesFromBook() { if(activeBook) location.href=`notes.html?topic=${encodeURIComponent(activeBook.title)}`; }
+function generateQuizFromBookId(id) { const b=books.find(x=>x.id===id); if(b) location.href=`quiz.html?topic=${encodeURIComponent(b.title)}`; }
+function generateNotesFromBookId(id) { const b=books.find(x=>x.id===id); if(b) location.href=`notes.html?topic=${encodeURIComponent(b.title)}`; }
+ 
+// Textarea auto-resize
+document.getElementById('ragInput').addEventListener('input', function() {
+  this.style.height='auto'; this.style.height=Math.min(this.scrollHeight,100)+'px';
+});
+document.getElementById('ragInput').addEventListener('keydown', e => {
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendRagMessage();}
+});
+ 
+function formatMD(t) {
+  return t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'<br/><br/>').replace(/\n/g,'<br/>');
+}
+function formatDate(d) {
+  if(!d) return 'Just now';
+  const diff = (Date.now()-new Date(d).getTime())/1000;
+  if(diff<60) return 'Just now';
+  if(diff<3600) return Math.floor(diff/60)+'m ago';
+  if(diff<86400) return Math.floor(diff/3600)+'h ago';
+  return Math.floor(diff/86400)+'d ago';
+}
+function now() { return new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}); }
+function showToast(msg, type) {
+  const t = document.createElement('div');
+  t.style.cssText=`position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;z-index:9999;animation:fadeIn .3s ease;background:${type==='success'?'#10B981':'#EF4444'};color:white;box-shadow:0 4px 20px rgba(0,0,0,.15)`;
+  t.textContent=msg; document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3000);
+}
+ 
+// Init
+fetchBooks();
+// Pre-fill from URL params
+const urlParams = new URLSearchParams(location.search);
+if(urlParams.get('topic')) document.getElementById('bookTitle').value = urlParams.get('topic');
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/logout.js"></script>
+<script>
+(async function () {
+
+    const { data } = await supabaseClient.auth.getSession();
+
+    if (!data.session) {
+        window.location.href = "auth.html";
+    }
+
+})();
+</script>
+</body>
+</html>

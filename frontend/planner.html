@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TamilAI – Study Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --blue:#2563EB;--purple:#7C3AED;--cyan:#06B6D4;
+      --green:#10B981;--red:#EF4444;--amber:#F59E0B;--pink:#EC4899;
+      --gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;
+      --gray-400:#94A3B8;--gray-500:#64748B;--gray-600:#475569;
+      --gray-700:#334155;--gray-800:#1E293B;--gray-900:#0F172A;
+      --sidebar-w:260px;
+      --font:'Inter',sans-serif;--font-t:'Noto Sans Tamil','Inter',sans-serif;
+    }
+    html,body{height:100%}
+    body{font-family:var(--font);background:var(--gray-50);display:flex;-webkit-font-smoothing:antialiased}
+ 
+    /* Sidebar */
+    .sidebar{width:var(--sidebar-w);flex-shrink:0;background:#fff;border-right:1px solid var(--gray-200);display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;z-index:100}
+    .sidebar-header{padding:20px;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;gap:10px}
+    .logo-icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:17px;color:#fff;font-weight:800;font-family:var(--font-t)}
+    .logo-text{font-size:17px;font-weight:700;color:var(--gray-900)}
+    .logo-text span{background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .sidebar-nav{flex:1;padding:12px;overflow-y:auto}
+    .nav-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray-400);padding:8px 8px 6px}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;font-size:14px;font-weight:500;color:var(--gray-600);cursor:pointer;margin-bottom:2px;text-decoration:none;transition:background .15s,color .15s}
+    .nav-item:hover{background:var(--gray-50);color:var(--gray-900)}
+    .nav-item.active{background:rgba(37,99,235,.08);color:var(--blue);font-weight:600}
+    .nav-icon{width:28px;height:28px;border-radius:6px;background:var(--gray-200);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+ 
+    .main{margin-left:var(--sidebar-w);flex:1;overflow-y:auto}
+    .topbar{background:#fff;border-bottom:1px solid var(--gray-200);padding:0 32px;height:64px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:50}
+    .topbar-title{font-size:18px;font-weight:700;color:var(--gray-900)}
+    .content{padding:24px 32px;max-width:1200px;margin:0 auto}
+ 
+    /* View Tabs */
+    .view-tabs{display:flex;background:var(--gray-100);border-radius:10px;padding:4px;width:fit-content;margin-bottom:24px}
+    .view-tab{padding:7px 18px;border-radius:7px;font-size:13px;font-weight:600;color:var(--gray-500);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+    .view-tab.active{background:#fff;color:var(--gray-900);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+ 
+    /* Layout */
+    .planner-layout{display:grid;grid-template-columns:280px 1fr;gap:20px}
+ 
+    /* ── LEFT PANEL ─────────────────────────────────────── */
+    .left-panel{display:flex;flex-direction:column;gap:16px}
+    .panel-card{background:#fff;border:1px solid var(--gray-200);border-radius:14px;padding:18px}
+    .panel-card h3{font-size:13px;font-weight:700;color:var(--gray-700);margin-bottom:14px;display:flex;align-items:center;gap:6px}
+    .form-group{margin-bottom:12px}
+    .form-label{font-size:11px;font-weight:600;color:var(--gray-600);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.5px}
+    .form-input,.form-select{width:100%;padding:9px 12px;border:1.5px solid var(--gray-200);border-radius:9px;font-size:13px;font-family:var(--font);color:var(--gray-800);background:#fff;outline:none;transition:border-color .2s}
+    .form-input:focus,.form-select:focus{border-color:var(--blue)}
+ 
+    .ai-gen-btn{width:100%;padding:12px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;border:none;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(37,99,235,.3);transition:opacity .2s,transform .2s}
+    .ai-gen-btn:hover{opacity:.92;transform:translateY(-1px)}
+    .ai-gen-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+ 
+    /* Subject tags */
+    .subject-tags{display:flex;flex-wrap:wrap;gap:6px}
+    .subj-tag{padding:5px 11px;border-radius:99px;font-size:11px;font-weight:600;border:1.5px solid var(--gray-200);background:#fff;color:var(--gray-600);cursor:pointer;transition:all .2s}
+    .subj-tag.sel{border-color:var(--blue);background:rgba(37,99,235,.08);color:var(--blue)}
+ 
+    /* Today's summary */
+    .today-summary{display:flex;flex-direction:column;gap:8px}
+    .today-stat{display:flex;justify-content:space-between;align-items:center;font-size:13px}
+    .today-stat-label{color:var(--gray-500);font-weight:500}
+    .today-stat-val{font-weight:700;color:var(--gray-900)}
+ 
+    /* ── WEEK VIEW ───────────────────────────────────────── */
+    .week-view{background:#fff;border:1px solid var(--gray-200);border-radius:14px;overflow:hidden}
+ 
+    .week-header{display:grid;grid-template-columns:80px repeat(7,1fr);border-bottom:1px solid var(--gray-200)}
+    .week-header-cell{padding:12px 8px;text-align:center;font-size:12px;font-weight:700;color:var(--gray-500);border-right:1px solid var(--gray-100)}
+    .week-header-cell:last-child{border-right:none}
+    .week-header-cell.today-col{color:var(--blue);background:rgba(37,99,235,.04)}
+    .day-num{font-size:18px;font-weight:800;color:var(--gray-900);display:block}
+    .day-num.today{color:var(--blue)}
+ 
+    .week-body{display:grid;grid-template-columns:80px repeat(7,1fr);max-height:520px;overflow-y:auto}
+    .week-body::-webkit-scrollbar{width:4px}
+    .week-body::-webkit-scrollbar-thumb{background:var(--gray-200);border-radius:99px}
+ 
+    .time-col{display:flex;flex-direction:column}
+    .time-slot{height:60px;display:flex;align-items:flex-start;padding:4px 8px;font-size:10px;font-weight:600;color:var(--gray-400);border-bottom:1px solid var(--gray-100)}
+ 
+    .day-col{border-right:1px solid var(--gray-100);display:flex;flex-direction:column;position:relative}
+    .day-col:last-child{border-right:none}
+    .day-col.today-col{background:rgba(37,99,235,.02)}
+    .hour-cell{height:60px;border-bottom:1px solid var(--gray-100);position:relative}
+ 
+    /* Session blocks */
+    .session-block{
+      position:absolute;left:3px;right:3px;border-radius:8px;padding:5px 8px;
+      font-size:11px;font-weight:600;cursor:pointer;overflow:hidden;
+      transition:opacity .2s,transform .2s;z-index:1;
+    }
+    .session-block:hover{opacity:.88;transform:scale(1.01)}
+    .session-block.done{opacity:.6;text-decoration:line-through}
+    .sb-subject{font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .sb-time{font-size:10px;opacity:.8;margin-top:1px}
+    .sb-tag{display:inline-block;font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(255,255,255,.25);margin-top:2px}
+ 
+    /* Day view */
+    .day-view{display:flex;flex-direction:column;gap:10px}
+    .day-session{
+      display:flex;gap:14px;align-items:flex-start;
+      padding:14px 16px;border-radius:12px;border:1.5px solid var(--gray-200);
+      background:#fff;cursor:pointer;transition:all .18s;
+    }
+    .day-session:hover{border-color:var(--blue);transform:translateX(3px)}
+    .day-session.done{opacity:.6;border-color:var(--green)}
+    .ds-time{font-size:12px;font-weight:700;color:var(--gray-500);min-width:80px;padding-top:2px}
+    .ds-color{width:4px;border-radius:99px;flex-shrink:0;align-self:stretch;min-height:40px}
+    .ds-body{flex:1}
+    .ds-subject{font-size:14px;font-weight:700;color:var(--gray-900);margin-bottom:2px}
+    .ds-topic{font-size:13px;color:var(--gray-500);font-family:var(--font-t)}
+    .ds-meta{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+    .ds-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px}
+    .ds-check{width:24px;height:24px;border-radius:50%;border:2px solid var(--gray-300);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;transition:all .2s}
+    .day-session.done .ds-check{background:var(--green);border-color:var(--green);color:#fff}
+ 
+    /* AI Plan banner */
+    .ai-plan-banner{
+      background:linear-gradient(135deg,var(--blue),var(--purple));
+      border-radius:14px;padding:20px 24px;margin-bottom:20px;
+      display:flex;align-items:center;gap:16px;
+    }
+    .ai-plan-icon{font-size:36px}
+    .ai-plan-title{font-size:16px;font-weight:800;color:#fff;margin-bottom:4px}
+    .ai-plan-sub{font-size:13px;color:rgba(255,255,255,.75);font-family:var(--font-t)}
+    .ai-plan-action{margin-left:auto;padding:10px 20px;border-radius:99px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .2s}
+    .ai-plan-action:hover{background:rgba(255,255,255,.3)}
+ 
+    /* Loading overlay */
+    .gen-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center}
+    .gen-overlay.show{display:flex}
+    .gen-modal{background:#fff;border-radius:20px;padding:40px;text-align:center;max-width:360px;width:90%}
+    .gen-icon{font-size:48px;animation:spin 2s linear infinite;display:block;margin-bottom:16px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .gen-title{font-size:18px;font-weight:800;color:var(--gray-900);margin-bottom:6px}
+    .gen-sub{font-size:14px;color:var(--gray-400);font-family:var(--font-t)}
+    .gen-bar-wrap{width:200px;height:4px;background:var(--gray-100);border-radius:99px;margin:20px auto 0;overflow:hidden}
+    .gen-bar{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:99px;animation:genLoad 2s ease infinite}
+    @keyframes genLoad{0%{width:0}50%{width:70%}100%{width:100%}}
+ 
+    @media(max-width:1000px){.planner-layout{grid-template-columns:1fr}}
+    @media(max-width:768px){.sidebar{display:none}.main{margin-left:0}.content{padding:16px}.week-view{overflow-x:auto}}
+  </style>
+</head>
+<body>
+ 
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-icon">த</div>
+    <span class="logo-text">Tamil<span>AI</span></span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Main</div>
+    <a class="nav-item" href="dashboard.html"><div class="nav-icon">🏠</div> Dashboard</a>
+    <a class="nav-item" href="tutor.html"><div class="nav-icon">🤖</div> AI Tutor</a>
+    <a class="nav-item" href="voice.html"><div class="nav-icon">🎤</div> Voice Tutor</a>
+    <a class="nav-item" href="textbook.html"><div class="nav-icon">📚</div> My Textbooks</a>
+    <div class="nav-label" style="margin-top:8px">Learning</div>
+    <a class="nav-item" href="quiz.html"><div class="nav-icon">❓</div> Quiz Generator</a>
+    <a class="nav-item" href="notes.html"><div class="nav-icon">📝</div> Notes AI</a>
+    <a class="nav-item active"><div class="nav-icon">📅</div> Study Planner</a>
+    <div class="nav-label" style="margin-top:8px">Track</div>
+    <a class="nav-item" href="progress.html"><div class="nav-icon">📈</div> My Progress</a>
+    <a class="nav-item" href="achievements.html"><div class="nav-icon">🏆</div> Achievements</a>
+  </nav>
+</aside>
+ 
+<!-- Loading overlay -->
+<div class="gen-overlay" id="genOverlay">
+  <div class="gen-modal">
+    <span class="gen-icon">🤖</span>
+    <div class="gen-title">AI Plan உருவாக்குகிறது…</div>
+    <div class="gen-sub">உங்கள் weak subjects மற்றும் தேர்வு தேதியை பார்க்கிறோம்</div>
+    <div class="gen-bar-wrap"><div class="gen-bar"></div></div>
+  </div>
+</div>
+ 
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">📅 Study Planner</div>
+      <div class="topbar-sub">AI-generated personal study timetable</div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:10px">
+      <button onclick="exportPlan()" style="padding:8px 14px;border-radius:8px;border:1.5px solid var(--gray-200);background:#fff;font-size:13px;font-weight:600;cursor:pointer;color:var(--gray-700)">📋 Export</button>
+      <button onclick="location.href='dashboard.html'" style="padding:8px 16px;border-radius:8px;border:1.5px solid var(--gray-200);background:#fff;font-size:13px;font-weight:600;cursor:pointer;color:var(--gray-700)">← Dashboard</button>
+    </div>
+  </div>
+ 
+  <div class="content">
+ 
+    <!-- View tabs -->
+    <div class="view-tabs">
+      <div class="view-tab active" onclick="setView('day',this)">📋 Day View</div>
+      <div class="view-tab" onclick="setView('week',this)">📅 Week View</div>
+      <div class="view-tab" onclick="setView('exam',this)">🎯 Exam Prep</div>
+    </div>
+ 
+    <div class="planner-layout">
+ 
+      <!-- LEFT -->
+      <div class="left-panel">
+ 
+        <div class="panel-card">
+          <h3>🤖 AI Plan Generator</h3>
+          <div class="form-group">
+            <label class="form-label">Study Hours / Day</label>
+            <select class="form-select" id="hoursPerDay">
+              <option value="1">1 hour</option>
+              <option value="2">2 hours</option>
+              <option value="3" selected>3 hours</option>
+              <option value="4">4 hours</option>
+              <option value="5">5+ hours</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Exam Date</label>
+            <input type="date" class="form-input" id="examDate"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Weak Subjects (select all)</label>
+            <div class="subject-tags" id="weakSubjects">
+              <span class="subj-tag" onclick="toggleSubj(this)">அறிவியல்</span>
+              <span class="subj-tag sel" onclick="toggleSubj(this)">Chemistry</span>
+              <span class="subj-tag" onclick="toggleSubj(this)">கணிதம்</span>
+              <span class="subj-tag" onclick="toggleSubj(this)">தமிழ்</span>
+              <span class="subj-tag" onclick="toggleSubj(this)">Physics</span>
+              <span class="subj-tag" onclick="toggleSubj(this)">சமூகவியல்</span>
+            </div>
+          </div>
+          <button class="ai-gen-btn" onclick="generatePlan()">
+            ✨ Generate AI Plan
+          </button>
+        </div>
+ 
+        <div class="panel-card">
+          <h3>📊 Today's Summary</h3>
+          <div class="today-summary">
+            <div class="today-stat"><span class="today-stat-label">Sessions planned</span><strong class="today-stat-val" id="todayPlanned">5</strong></div>
+            <div class="today-stat"><span class="today-stat-label">Completed</span><strong class="today-stat-val" style="color:var(--green)" id="todayDone">2</strong></div>
+            <div class="today-stat"><span class="today-stat-label">Study time</span><strong class="today-stat-val" id="todayTime">3h 15m</strong></div>
+            <div class="today-stat"><span class="today-stat-label">XP today</span><strong class="today-stat-val" style="color:var(--amber)">+120 ⚡</strong></div>
+          </div>
+          <div style="margin-top:14px">
+            <div style="font-size:11px;font-weight:600;color:var(--gray-500);margin-bottom:6px">COMPLETION</div>
+            <div style="height:8px;background:var(--gray-100);border-radius:99px;overflow:hidden">
+              <div id="completionBar" style="width:40%;height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:99px;transition:width .5s ease"></div>
+            </div>
+            <div style="font-size:11px;color:var(--gray-400);margin-top:4px;text-align:right" id="completionPct">40% done</div>
+          </div>
+        </div>
+ 
+        <div class="panel-card">
+          <h3>⏰ Quick Add Session</h3>
+          <div class="form-group">
+            <label class="form-label">Subject</label>
+            <select class="form-select" id="addSubject">
+              <option>அறிவியல்</option><option>கணிதம்</option>
+              <option>Physics</option><option>Chemistry</option>
+              <option>சமூகவியல்</option><option>தமிழ்</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Time</label>
+            <input type="time" class="form-input" id="addTime" value="16:00"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Duration</label>
+            <select class="form-select" id="addDuration">
+              <option value="30">30 min</option>
+              <option value="45">45 min</option>
+              <option value="60" selected>1 hour</option>
+              <option value="90">90 min</option>
+            </select>
+          </div>
+          <button onclick="quickAddSession()" style="width:100%;padding:10px;border-radius:9px;border:1.5px solid var(--blue);background:rgba(37,99,235,.06);color:var(--blue);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s">+ Add Session</button>
+        </div>
+ 
+      </div>
+ 
+      <!-- RIGHT -->
+      <div id="plannerRight">
+ 
+        <!-- AI Plan Banner (shown when plan exists) -->
+        <div class="ai-plan-banner" id="aiBanner" style="display:none">
+          <div class="ai-plan-icon">🤖</div>
+          <div>
+            <div class="ai-plan-title">AI Study Plan Active</div>
+            <div class="ai-plan-sub" id="aiBannerSub">Personalized plan based on your weak subjects</div>
+          </div>
+          <button class="ai-plan-action" onclick="generatePlan()">🔄 Regenerate</button>
+        </div>
+ 
+        <!-- Day View -->
+        <div id="viewDay">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <div>
+              <div style="font-size:20px;font-weight:800;color:var(--gray-900)" id="dayTitle">Today</div>
+              <div style="font-size:13px;color:var(--gray-400)" id="dayDateLabel"></div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button onclick="changeDay(-1)" style="padding:8px 14px;border-radius:8px;border:1.5px solid var(--gray-200);background:#fff;font-size:13px;font-weight:600;cursor:pointer;color:var(--gray-700)">← Prev</button>
+              <button onclick="goToday()" style="padding:8px 14px;border-radius:8px;border:1.5px solid var(--blue);background:rgba(37,99,235,.06);font-size:13px;font-weight:600;cursor:pointer;color:var(--blue)">Today</button>
+              <button onclick="changeDay(1)" style="padding:8px 14px;border-radius:8px;border:1.5px solid var(--gray-200);background:#fff;font-size:13px;font-weight:600;cursor:pointer;color:var(--gray-700)">Next →</button>
+            </div>
+          </div>
+          <div class="day-view" id="dayView"></div>
+        </div>
+ 
+        <!-- Week View -->
+        <div id="viewWeek" style="display:none">
+          <div class="week-view">
+            <div class="week-header" id="weekHeader">
+              <div class="week-header-cell" style="border-right:1px solid var(--gray-200)">
+                <span style="font-size:11px">TIME</span>
+              </div>
+            </div>
+            <div class="week-body" id="weekBody">
+              <div class="time-col" id="timeCol"></div>
+            </div>
+          </div>
+        </div>
+ 
+        <!-- Exam Prep View -->
+        <div id="viewExam" style="display:none">
+          <div style="background:#fff;border:1px solid var(--gray-200);border-radius:14px;padding:24px">
+            <div style="text-align:center;margin-bottom:28px">
+              <div style="font-size:40px;margin-bottom:10px">🎯</div>
+              <h2 style="font-size:22px;font-weight:800;color:var(--gray-900);margin-bottom:6px">Exam Preparation Plan</h2>
+              <p style="font-size:14px;color:var(--gray-400);font-family:var(--font-t)">தேர்வு தேதியை அமைத்து AI Exam Plan பெறுங்கள்</p>
+            </div>
+            <div id="examPlanContent"></div>
+          </div>
+        </div>
+ 
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<script>
+const API = 'http://localhost:5000/api';
+const token = localStorage.getItem('tamilai_token');
+const PLAN_KEY = 'tamilai_plan';
+ 
+let currentDay = new Date();
+let sessions   = loadSessions();
+let currentView = 'day';
+ 
+// Subject colors
+const COLORS = {
+  'அறிவியல்':  {bg:'#2563EB',light:'rgba(37,99,235,.12)',text:'#1D4ED8'},
+  'Physics':    {bg:'#7C3AED',light:'rgba(124,58,237,.12)',text:'#6D28D9'},
+  'Chemistry':  {bg:'#EF4444',light:'rgba(239,68,68,.12)', text:'#DC2626'},
+  'கணிதம்':    {bg:'#F59E0B',light:'rgba(245,158,11,.12)',text:'#B45309'},
+  'சமூகவியல்': {bg:'#10B981',light:'rgba(16,185,129,.12)',text:'#059669'},
+  'தமிழ்':     {bg:'#06B6D4',light:'rgba(6,182,212,.12)', text:'#0891B2'},
+  'English':    {bg:'#EC4899',light:'rgba(236,72,153,.12)',text:'#DB2777'},
+  'Quiz':       {bg:'#6366F1',light:'rgba(99,102,241,.12)',text:'#4F46E5'},
+  'Revision':   {bg:'#14B8A6',light:'rgba(20,184,166,.12)',text:'#0D9488'},
+};
+ 
+function getColor(subj) {
+  return COLORS[subj] || {bg:'#94A3B8',light:'rgba(148,163,184,.12)',text:'#64748B'};
+}
+ 
+function loadSessions() {
+  const saved = localStorage.getItem(PLAN_KEY);
+  if (saved) return JSON.parse(saved);
+  return getDefaultSessions();
+}
+ 
+function saveSessions() {
+  localStorage.setItem(PLAN_KEY, JSON.stringify(sessions));
+}
+ 
+function getDefaultSessions() {
+  const today = new Date();
+  const fmt = d => d.toISOString().split('T')[0];
+  const addDays = (d,n) => { const r=new Date(d); r.setDate(r.getDate()+n); return r; };
+ 
+  return [
+    {id:1, date:fmt(today),      subject:'அறிவியல்',  topic:'ஒளிச்சேர்க்கை Chapter 3', time:'08:00', dur:60, type:'study',    done:true },
+    {id:2, date:fmt(today),      subject:'Chemistry',  topic:'அமிலம் மற்றும் காரம்',     time:'10:00', dur:45, type:'quiz',     done:true },
+    {id:3, date:fmt(today),      subject:'கணிதம்',    topic:'Algebra Practice Set 4',    time:'14:00', dur:60, type:'practice', done:false},
+    {id:4, date:fmt(today),      subject:'Physics',    topic:'Newton Laws Revision',      time:'16:00', dur:45, type:'revision', done:false},
+    {id:5, date:fmt(today),      subject:'தமிழ்',     topic:'இலக்கணம் Chapter 5',        time:'19:00', dur:30, type:'study',    done:false},
+    {id:6, date:fmt(addDays(today,1)), subject:'Chemistry', topic:'Chemical Bonding',    time:'09:00', dur:60, type:'study',    done:false},
+    {id:7, date:fmt(addDays(today,1)), subject:'Revision',  topic:'Full Syllabus Review', time:'15:00', dur:90, type:'revision', done:false},
+    {id:8, date:fmt(addDays(today,2)), subject:'Quiz',       topic:'Chapter 1-5 Mock Test',time:'10:00',dur:60,type:'quiz',     done:false},
+    {id:9, date:fmt(addDays(today,-1)),subject:'அறிவியல்', topic:'DNA Structure',         time:'14:00', dur:45, type:'study',    done:true },
+  ];
+}
+ 
+// ── Views ────────────────────────────────────────────────────
+function setView(v, el) {
+  currentView = v;
+  document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  ['day','week','exam'].forEach(n => document.getElementById(`view${n.charAt(0).toUpperCase()+n.slice(1)}`).style.display = n===v ? 'block' : 'none');
+  if (v==='day')  renderDayView();
+  if (v==='week') renderWeekView();
+  if (v==='exam') renderExamView();
+}
+ 
+// ── Day View ─────────────────────────────────────────────────
+function renderDayView() {
+  const dateKey = currentDay.toISOString().split('T')[0];
+  const isToday = dateKey === new Date().toISOString().split('T')[0];
+  const dayName = currentDay.toLocaleDateString('en-IN', {weekday:'long',day:'numeric',month:'long'});
+ 
+  document.getElementById('dayTitle').textContent   = isToday ? 'Today' : currentDay.toLocaleDateString('en-IN',{weekday:'long'});
+  document.getElementById('dayDateLabel').textContent = dayName;
+ 
+  const daySessions = sessions.filter(s => s.date === dateKey).sort((a,b) => a.time.localeCompare(b.time));
+  const el = document.getElementById('dayView');
+ 
+  if (!daySessions.length) {
+    el.innerHTML = `
+      <div style="text-align:center;padding:60px 20px;background:#fff;border:1px solid var(--gray-200);border-radius:14px">
+        <div style="font-size:40px;margin-bottom:12px">📅</div>
+        <div style="font-size:16px;font-weight:700;color:var(--gray-900);margin-bottom:6px">No sessions planned</div>
+        <div style="font-size:13px;color:var(--gray-400)">Use the left panel to add sessions or generate an AI plan.</div>
+      </div>`;
+    updateTodaySummary([], []);
+    return;
+  }
+ 
+  el.innerHTML = daySessions.map(s => {
+    const c = getColor(s.subject);
+    const typeColors = {study:'#2563EB',quiz:'#7C3AED',revision:'#10B981',practice:'#F59E0B'};
+    const typeLabels = {study:'Study',quiz:'Quiz',revision:'Revision',practice:'Practice'};
+    return `
+      <div class="day-session ${s.done?'done':''}" onclick="toggleSession(${s.id})" id="sess-${s.id}">
+        <div class="ds-time">${formatTime(s.time)}</div>
+        <div class="ds-color" style="background:${c.bg}"></div>
+        <div class="ds-body">
+          <div class="ds-subject">${s.subject}</div>
+          <div class="ds-topic">${s.topic}</div>
+          <div class="ds-meta">
+            <span class="ds-badge" style="background:${c.light};color:${c.text}">⏱ ${s.dur} min</span>
+            <span class="ds-badge" style="background:rgba(99,102,241,.1);color:#4F46E5">${typeLabels[s.type]||s.type}</span>
+            ${s.done ? '<span class="ds-badge" style="background:rgba(16,185,129,.1);color:#059669">✓ Done</span>' : ''}
+          </div>
+        </div>
+        <div class="ds-check">${s.done?'✓':''}</div>
+      </div>`;
+  }).join('');
+ 
+  updateTodaySummary(daySessions, daySessions.filter(s=>s.done));
+}
+ 
+function toggleSession(id) {
+  const s = sessions.find(x => x.id === id);
+  if (s) { s.done = !s.done; saveSessions(); renderDayView(); }
+}
+ 
+function updateTodaySummary(all, done) {
+  document.getElementById('todayPlanned').textContent = all.length;
+  document.getElementById('todayDone').textContent    = done.length;
+  const totalMin = all.reduce((a,s) => a+s.dur, 0);
+  document.getElementById('todayTime').textContent    = `${Math.floor(totalMin/60)}h ${totalMin%60}m`;
+  const pct = all.length ? Math.round(done.length/all.length*100) : 0;
+  document.getElementById('completionBar').style.width = pct+'%';
+  document.getElementById('completionPct').textContent  = pct+'% done';
+}
+ 
+function changeDay(n) { currentDay.setDate(currentDay.getDate()+n); renderDayView(); }
+function goToday()    { currentDay = new Date(); renderDayView(); }
+ 
+// ── Week View ─────────────────────────────────────────────────
+function renderWeekView() {
+  const weekStart = new Date(currentDay);
+  weekStart.setDate(currentDay.getDate() - currentDay.getDay());
+ 
+  const header = document.getElementById('weekHeader');
+  const body   = document.getElementById('weekBody');
+  const timeCol = document.getElementById('timeCol');
+ 
+  // Build headers
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const today = new Date().toISOString().split('T')[0];
+  header.innerHTML = '<div class="week-header-cell" style="border-right:1px solid var(--gray-200)"><span style="font-size:11px">TIME</span></div>';
+  for (let i=0; i<7; i++) {
+    const d = new Date(weekStart); d.setDate(weekStart.getDate()+i);
+    const dateKey = d.toISOString().split('T')[0];
+    const isToday = dateKey === today;
+    header.innerHTML += `
+      <div class="week-header-cell ${isToday?'today-col':''}">
+        <span>${days[i]}</span>
+        <span class="day-num ${isToday?'today':''}">${d.getDate()}</span>
+      </div>`;
+  }
+ 
+  // Time slots 6am-10pm
+  timeCol.innerHTML = '';
+  for (let h=6; h<=22; h++) {
+    const div = document.createElement('div');
+    div.className = 'time-slot';
+    div.textContent = `${h}:00`;
+    timeCol.appendChild(div);
+  }
+ 
+  // Day columns
+  body.innerHTML = '<div class="time-col" id="timeCol2"></div>';
+  for (let h=6; h<=22; h++) {
+    const div = document.createElement('div');
+    div.className='time-slot'; div.textContent=`${h}:00`;
+    document.getElementById('timeCol2').appendChild(div);
+  }
+ 
+  for (let i=0; i<7; i++) {
+    const d = new Date(weekStart); d.setDate(weekStart.getDate()+i);
+    const dateKey = d.toISOString().split('T')[0];
+    const isToday = dateKey === today;
+    const col = document.createElement('div');
+    col.className = `day-col ${isToday?'today-col':''}`;
+ 
+    for (let h=6; h<=22; h++) {
+      const cell = document.createElement('div');
+      cell.className = 'hour-cell'; col.appendChild(cell);
+    }
+ 
+    // Place sessions
+    sessions.filter(s => s.date===dateKey).forEach(s => {
+      const [hh,mm] = s.time.split(':').map(Number);
+      if (hh < 6 || hh > 22) return;
+      const topPct = ((hh-6) + mm/60) * 60;
+      const heightPx = (s.dur/60)*60;
+      const c = getColor(s.subject);
+      const block = document.createElement('div');
+      block.className = `session-block ${s.done?'done':''}`;
+      block.style.cssText = `top:${topPct}px;height:${heightPx-4}px;background:${c.light};border-left:3px solid ${c.bg}`;
+      block.innerHTML = `<div class="sb-subject" style="color:${c.text}">${s.subject}</div><div class="sb-time" style="color:${c.text}">${s.time} · ${s.dur}m</div>`;
+      block.onclick = () => { toggleSession(s.id); renderWeekView(); };
+      col.style.position = 'relative';
+      col.appendChild(block);
+    });
+ 
+    body.appendChild(col);
+  }
+}
+ 
+// ── Exam View ─────────────────────────────────────────────────
+function renderExamView() {
+  const examDate = document.getElementById('examDate').value;
+  const el = document.getElementById('examPlanContent');
+  const daysLeft = examDate ? Math.ceil((new Date(examDate)-new Date())/86400000) : null;
+ 
+  if (!daysLeft || daysLeft < 0) {
+    el.innerHTML = `
+      <div style="text-align:center;padding:20px">
+        <p style="font-size:14px;color:var(--gray-400);margin-bottom:16px">Select your exam date in the left panel to generate an AI exam preparation plan.</p>
+        <button onclick="generatePlan()" style="padding:12px 24px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;border:none;font-size:14px;font-weight:700;cursor:pointer">🎯 Generate Exam Plan</button>
+      </div>`;
+    return;
+  }
+ 
+  const weeks = Math.floor(daysLeft/7);
+  el.innerHTML = `
+    <div style="background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.2);border-radius:12px;padding:16px;margin-bottom:20px;display:flex;gap:20px;flex-wrap:wrap">
+      <div style="text-align:center"><div style="font-size:28px;font-weight:800;color:var(--blue)">${daysLeft}</div><div style="font-size:12px;color:var(--gray-500)">Days Left</div></div>
+      <div style="text-align:center"><div style="font-size:28px;font-weight:800;color:var(--purple)">${weeks}</div><div style="font-size:12px;color:var(--gray-500)">Weeks</div></div>
+      <div style="text-align:center"><div style="font-size:28px;font-weight:800;color:var(--green)">6</div><div style="font-size:12px;color:var(--gray-500)">Subjects</div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      ${[
+        {week:'Week 1-2', focus:'அறிவியல் + Chemistry', icon:'🔬', color:COLORS['அறிவியல்'], detail:'Weak topic intensive study with daily quizzes'},
+        {week:'Week 3-4', focus:'Physics + கணிதம்',    icon:'📐', color:COLORS['Physics'],   detail:'Formula revision and problem solving'},
+        {week:'Week 5',   focus:'சமூகவியல் + தமிழ்',  icon:'📖', color:COLORS['சமூகவியல்'], detail:'Chapter summaries and important QAs'},
+        {week:'Final Days',focus:'Full Revision + Mock Tests',icon:'🎯', color:COLORS['Quiz'], detail:'2 mock tests per day, weak area fixes'},
+      ].map(w=>`
+        <div style="display:flex;gap:14px;align-items:flex-start;padding:16px;border-radius:12px;border:1px solid var(--gray-200);background:#fff">
+          <div style="width:40px;height:40px;border-radius:10px;background:${w.color?.light||'var(--gray-100)'};display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${w.icon}</div>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:${w.color?.text||'var(--gray-500)'};text-transform:uppercase;letter-spacing:.5px">${w.week}</div>
+            <div style="font-size:15px;font-weight:700;color:var(--gray-900);margin:2px 0;font-family:var(--font-t)">${w.focus}</div>
+            <div style="font-size:13px;color:var(--gray-500)">${w.detail}</div>
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+ 
+// ── AI Plan Generator ─────────────────────────────────────────
+async function generatePlan() {
+  document.getElementById('genOverlay').classList.add('show');
+  document.getElementById('aiBanner').style.display = 'none';
+ 
+  const hours   = document.getElementById('hoursPerDay').value;
+  const examDate = document.getElementById('examDate').value;
+  const weakSubjs = [...document.querySelectorAll('.subj-tag.sel')].map(e=>e.textContent);
+ 
+  await new Promise(r => setTimeout(r, 2500)); // simulate AI
+ 
+  // Generate sessions for next 7 days
+  const newSessions = [];
+  let id = Date.now();
+  const today = new Date();
+ 
+  const actTypes = ['study','quiz','revision','practice'];
+  const topics = {
+    'அறிவியல்':  ['ஒளிச்சேர்க்கை','DNA அமைப்பு','உயிரணுக்கள்'],
+    'Chemistry':  ['Chemical Bonding','அமிலம் காரம்','Periodic Table'],
+    'Physics':    ['Newton Laws','Electricity','Light & Optics'],
+    'கணிதம்':    ['Algebra','Geometry','Statistics'],
+    'சமூகவியல்': ['Geography','History','Civics'],
+    'தமிழ்':     ['இலக்கணம்','கவிதை','உரைநடை'],
+  };
+ 
+  const allSubjs = Object.keys(topics);
+  const timeSlots = ['08:00','10:00','14:00','16:00','19:00'];
+ 
+  for (let day=0; day<7; day++) {
+    const d = new Date(today); d.setDate(today.getDate()+day);
+    const dateKey = d.toISOString().split('T')[0];
+    const sessionCount = Math.min(parseInt(hours)+1, 4);
+    const daySubjs = day===0 ? weakSubjs.slice(0,2) : [...weakSubjs, ...allSubjs].slice(day%allSubjs.length, day%allSubjs.length+2);
+ 
+    daySubjs.slice(0,sessionCount).forEach((subj,i) => {
+      const topicList = topics[subj] || ['Chapter Review'];
+      const topic = topicList[Math.floor(Math.random()*topicList.length)];
+      newSessions.push({
+        id: id++, date: dateKey, subject: subj,
+        topic, time: timeSlots[i] || '16:00',
+        dur: i===0 ? 60 : 45,
+        type: actTypes[i%actTypes.length], done: false,
+      });
+    });
+  }
+ 
+  // Keep old done sessions, add new ones
+  const doneOld = sessions.filter(s => s.done);
+  sessions = [...doneOld.filter(s => {
+    const d = new Date(s.date);
+    return d < today;
+  }), ...newSessions];
+ 
+  saveSessions();
+  document.getElementById('genOverlay').classList.remove('show');
+  document.getElementById('aiBanner').style.display = 'flex';
+  document.getElementById('aiBannerSub').textContent =
+    `AI plan for ${weakSubjs.join(', ')} — ${hours}h/day · ${examDate ? 'Exam: '+examDate : '7-day plan'}`;
+ 
+  renderDayView();
+  if (currentView==='week') renderWeekView();
+  if (currentView==='exam') renderExamView();
+}
+ 
+function quickAddSession() {
+  const subj = document.getElementById('addSubject').value;
+  const time  = document.getElementById('addTime').value;
+  const dur   = parseInt(document.getElementById('addDuration').value);
+  const dateKey = currentDay.toISOString().split('T')[0];
+ 
+  sessions.push({ id: Date.now(), date:dateKey, subject:subj, topic:'Custom Study Session', time, dur, type:'study', done:false });
+  saveSessions();
+  renderDayView();
+  if (currentView==='week') renderWeekView();
+}
+ 
+function toggleSubj(el) { el.classList.toggle('sel'); }
+ 
+function formatTime(t) {
+  const [h,m] = t.split(':').map(Number);
+  const ampm = h>=12 ? 'PM' : 'AM';
+  const hh = h%12||12;
+  return `${hh}:${m.toString().padStart(2,'0')} ${ampm}`;
+}
+ 
+function exportPlan() {
+  const lines = sessions.sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time))
+    .map(s=>`${s.date} | ${s.time} | ${s.subject} | ${s.topic} | ${s.dur}min | ${s.done?'Done':'Pending'}`);
+  const blob = new Blob([lines.join('\n')], {type:'text/plain'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='study-plan.txt'; a.click();
+}
+ 
+// Set default exam date to 30 days from now
+const ed = new Date(); ed.setDate(ed.getDate()+30);
+document.getElementById('examDate').value = ed.toISOString().split('T')[0];
+ 
+// Init
+renderDayView();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/logout.js"></script>
+<script>
+(async function () {
+
+    const { data } = await supabaseClient.auth.getSession();
+
+    if (!data.session) {
+        window.location.href = "auth.html";
+    }
+
+})();
+</script>
+</body>
+</html>

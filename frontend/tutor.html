@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TamilAI – AI Tutor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue:#2563EB; --blue-light:#3B82F6;
+      --purple:#7C3AED; --purple-light:#8B5CF6;
+      --cyan:#06B6D4;
+      --gray-50:#F8FAFC; --gray-100:#F1F5F9; --gray-200:#E2E8F0;
+      --gray-400:#94A3B8; --gray-500:#64748B; --gray-600:#475569;
+      --gray-700:#334155; --gray-800:#1E293B; --gray-900:#0F172A;
+      --white:#FFFFFF;
+      --sidebar-w:260px;
+      --font:'Inter',sans-serif;
+      --font-tamil:'Noto Sans Tamil','Inter',sans-serif;
+    }
+
+    html, body { height: 100%; }
+    body {
+      font-family: var(--font); background: var(--gray-50);
+      display: flex; -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── SIDEBAR (shared) ─────────────────────────── same as dashboard ── */
+    .sidebar {
+      width: var(--sidebar-w); flex-shrink: 0;
+      background: white; border-right: 1px solid var(--gray-200);
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
+    }
+    .sidebar-header { padding: 20px 20px 16px; border-bottom:1px solid var(--gray-100); display:flex; align-items:center; gap:10px; }
+    .logo-icon { width:36px; height:36px; border-radius:8px; background:linear-gradient(135deg,var(--blue),var(--purple)); display:flex; align-items:center; justify-content:center; font-size:17px; color:white; font-weight:800; font-family:var(--font-tamil); }
+    .logo-text { font-size:17px; font-weight:700; color:var(--gray-900); }
+    .logo-text span { background:linear-gradient(135deg,var(--blue),var(--purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .nav-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; font-size:14px; font-weight:500; color:var(--gray-600); cursor:pointer; margin-bottom:2px; text-decoration:none; transition:background .15s,color .15s; }
+    .nav-item:hover { background:var(--gray-50); color:var(--gray-900); }
+    .nav-item.active { background:rgba(37,99,235,.08); color:var(--blue); font-weight:600; }
+    .nav-icon { width:28px; height:28px; border-radius:6px; background:var(--gray-200); display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+    .nav-badge { margin-left:auto; font-size:10px; font-weight:700; color:white; background:var(--blue); padding:2px 7px; border-radius:99px; }
+    .sidebar-nav { flex:1; padding:12px; overflow-y:auto; }
+    .nav-section-label { font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--gray-400); padding:8px 8px 6px; }
+
+    /* ─── MAIN LAYOUT ─────────────────────────────────────── */
+    .main { margin-left: var(--sidebar-w); flex:1; display:flex; flex-direction:column; height:100vh; overflow:hidden; }
+
+    /* ─── TUTOR TOPBAR ────────────────────────────────────── */
+    .tutor-topbar {
+      background: white; border-bottom: 1px solid var(--gray-200);
+      padding: 0 24px; height: 64px; flex-shrink: 0;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .tutor-av {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .tutor-info { flex: 1; }
+    .tutor-name { font-size: 15px; font-weight: 700; color: var(--gray-900); }
+    .tutor-status { font-size: 12px; color: var(--gray-400); display: flex; align-items: center; gap: 6px; }
+    .online-dot { width: 7px; height: 7px; border-radius: 50%; background: #10B981; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+    .tutor-actions { display: flex; gap: 8px; }
+    .topbar-btn {
+      padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600;
+      border: 1.5px solid var(--gray-200); background: white; cursor: pointer; color: var(--gray-700);
+      display: flex; align-items: center; gap: 6px;
+      transition: border-color .2s, background .2s;
+    }
+    .topbar-btn:hover { border-color: var(--blue); background: rgba(37,99,235,.04); color: var(--blue); }
+
+    /* ─── CHAT LAYOUT ─────────────────────────────────────── */
+    .chat-layout { flex: 1; display: flex; overflow: hidden; }
+
+    /* ─── CHAT MESSAGES AREA ──────────────────────────────── */
+    .chat-area {
+      flex: 1; display: flex; flex-direction: column; overflow: hidden;
+    }
+    .messages-scroll {
+      flex: 1; overflow-y: auto; padding: 24px;
+      display: flex; flex-direction: column; gap: 20px;
+      scroll-behavior: smooth;
+    }
+    .messages-scroll::-webkit-scrollbar { width: 4px; }
+    .messages-scroll::-webkit-scrollbar-track { background: transparent; }
+    .messages-scroll::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 99px; }
+
+    /* Welcome state */
+    .welcome-state {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; height: 100%; padding: 40px;
+      gap: 24px;
+    }
+    .welcome-icon {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px; box-shadow: 0 8px 32px rgba(37,99,235,.3);
+    }
+    .welcome-title { font-size: 26px; font-weight: 800; color: var(--gray-900); }
+    .welcome-sub { font-size: 15px; color: var(--gray-500); line-height: 1.7; max-width: 480px; font-family: var(--font-tamil); }
+
+    .suggested-questions {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+      max-width: 580px; width: 100%;
+    }
+    .suggested-q {
+      padding: 14px 16px; border-radius: 12px;
+      border: 1.5px solid var(--gray-200); background: white;
+      font-size: 13px; font-weight: 500; color: var(--gray-700);
+      cursor: pointer; text-align: left; line-height: 1.5;
+      font-family: var(--font-tamil);
+      transition: border-color .2s, transform .2s, box-shadow .2s;
+    }
+    .suggested-q:hover { border-color: var(--blue); transform: translateY(-2px); box-shadow: 0 4px 14px rgba(37,99,235,.12); color: var(--blue); }
+
+    /* Chat messages */
+    .msg-row { display: flex; gap: 12px; align-items: flex-start; animation: msgIn .3s ease; }
+    .msg-row.user { flex-direction: row-reverse; }
+    @keyframes msgIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+    .msg-av {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; flex-shrink: 0;
+    }
+    .av-ai   { background: linear-gradient(135deg, var(--blue), var(--purple)); color: white; }
+    .av-user { background: var(--gray-200); color: var(--gray-600); }
+
+    .msg-content { max-width: 72%; display: flex; flex-direction: column; gap: 6px; }
+    .msg-row.user .msg-content { align-items: flex-end; }
+
+    .msg-bubble {
+      padding: 13px 17px; border-radius: 16px;
+      font-size: 14px; line-height: 1.75;
+    }
+    .bubble-ai {
+      background: white; border: 1px solid var(--gray-200);
+      color: var(--gray-800); border-top-left-radius: 4px;
+    }
+    .bubble-user {
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: white; border-top-right-radius: 4px;
+    }
+    .bubble-tamil { font-family: var(--font-tamil); }
+
+    .msg-time { font-size: 11px; color: var(--gray-400); padding: 0 4px; }
+    .msg-row.user .msg-time { text-align: right; }
+
+    /* Message actions */
+    .msg-actions {
+      display: flex; gap: 4px; opacity: 0;
+      transition: opacity .2s;
+    }
+    .msg-row:hover .msg-actions { opacity: 1; }
+    .msg-action-btn {
+      padding: 4px 8px; border-radius: 6px; font-size: 12px;
+      background: white; border: 1px solid var(--gray-200);
+      cursor: pointer; color: var(--gray-500);
+      transition: background .15s, color .15s;
+    }
+    .msg-action-btn:hover { background: var(--gray-100); color: var(--gray-800); }
+
+    /* Typing indicator */
+    .typing-bubble {
+      background: white; border: 1px solid var(--gray-200);
+      border-radius: 16px; border-top-left-radius: 4px;
+      padding: 14px 18px; display: flex; gap: 5px; align-items: center;
+      width: fit-content;
+    }
+    .t-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gray-300); animation: typing 1.3s infinite; }
+    .t-dot:nth-child(2) { animation-delay:.15s; }
+    .t-dot:nth-child(3) { animation-delay:.3s; }
+    @keyframes typing { 0%,100%{transform:translateY(0); opacity:.4} 50%{transform:translateY(-5px); opacity:1} }
+
+    /* Related topics chips */
+    .related-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .chip {
+      font-size: 12px; font-weight: 600;
+      padding: 5px 12px; border-radius: 99px;
+      border: 1px solid var(--gray-200); background: white;
+      color: var(--gray-600); cursor: pointer;
+      transition: all .2s;
+    }
+    .chip:hover { border-color: var(--blue); color: var(--blue); background: rgba(37,99,235,.04); }
+
+    /* ─── INPUT AREA ──────────────────────────────────────── */
+    .input-area {
+      padding: 16px 24px 20px;
+      background: white; border-top: 1px solid var(--gray-200);
+      flex-shrink: 0;
+    }
+    .subject-pills {
+      display: flex; gap: 6px; margin-bottom: 10px; overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .subject-pills::-webkit-scrollbar { display: none; }
+    .subj-pill {
+      padding: 5px 14px; border-radius: 99px; font-size: 12px; font-weight: 600;
+      border: 1.5px solid var(--gray-200); background: white; color: var(--gray-500);
+      cursor: pointer; white-space: nowrap;
+      transition: all .2s;
+    }
+    .subj-pill.active { border-color: var(--blue); background: rgba(37,99,235,.08); color: var(--blue); }
+
+    .input-box {
+      display: flex; align-items: flex-end; gap: 10px;
+      background: var(--gray-50); border: 1.5px solid var(--gray-200);
+      border-radius: 14px; padding: 10px 12px;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .input-box:focus-within { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.1); background: white; }
+
+    textarea#chatInput {
+      flex: 1; border: none; outline: none; resize: none;
+      font-size: 14px; font-family: var(--font-tamil);
+      background: transparent; color: var(--gray-800);
+      line-height: 1.6; min-height: 22px; max-height: 120px;
+    }
+    textarea#chatInput::placeholder { color: var(--gray-400); }
+
+    .input-btns { display: flex; gap: 6px; align-items: center; }
+    .voice-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1.5px solid var(--gray-200); background: white;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      transition: all .2s;
+    }
+    .voice-btn:hover { border-color: var(--purple); background: rgba(124,58,237,.06); }
+    .voice-btn.recording { background: rgba(239,68,68,.1); border-color: #EF4444; animation: recPulse 1s infinite; }
+    @keyframes recPulse { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)} 50%{box-shadow:0 0 0 6px rgba(239,68,68,0)} }
+
+    .send-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity .2s, transform .2s;
+      box-shadow: 0 2px 10px rgba(37,99,235,.35);
+    }
+    .send-btn:hover { opacity: .9; transform: scale(1.05); }
+    .send-btn:disabled { opacity: .4; transform: none; cursor: not-allowed; }
+    .send-icon { width: 16px; height: 16px; }
+
+    .input-hint { font-size: 11px; color: var(--gray-400); margin-top: 8px; text-align: center; }
+
+    /* ─── RIGHT PANEL ─────────────────────────────────────── */
+    .right-panel {
+      width: 280px; flex-shrink: 0;
+      border-left: 1px solid var(--gray-200);
+      background: white; display: flex; flex-direction: column;
+      overflow-y: auto;
+    }
+    .right-panel::-webkit-scrollbar { width: 3px; }
+    .right-panel::-webkit-scrollbar-thumb { background: var(--gray-200); }
+
+    .rpanel-section { padding: 20px; border-bottom: 1px solid var(--gray-100); }
+    .rpanel-title { font-size: 12px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--gray-400); margin-bottom: 14px; }
+
+    .session-list { display: flex; flex-direction: column; gap: 6px; }
+    .session-item {
+      padding: 10px 12px; border-radius: 8px; cursor: pointer;
+      border: 1px solid transparent;
+      transition: background .15s, border-color .15s;
+    }
+    .session-item:hover { background: var(--gray-50); border-color: var(--gray-200); }
+    .session-item.active { background: rgba(37,99,235,.06); border-color: rgba(37,99,235,.2); }
+    .session-title { font-size: 13px; font-weight: 600; color: var(--gray-800); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .session-sub   { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
+
+    .topic-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .topic-chip {
+      font-size: 12px; padding: 5px 10px; border-radius: 99px;
+      background: var(--gray-100); color: var(--gray-600); cursor: pointer; font-weight: 500;
+      transition: background .15s, color .15s;
+    }
+    .topic-chip:hover { background: rgba(37,99,235,.1); color: var(--blue); }
+
+    .note-btn {
+      width: 100%; padding: 10px; border-radius: 8px;
+      border: 1.5px solid var(--gray-200); background: white;
+      font-size: 13px; font-weight: 600; color: var(--gray-700);
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: all .2s; margin-top: 8px;
+    }
+    .note-btn:hover { border-color: var(--blue); color: var(--blue); background: rgba(37,99,235,.04); }
+    .note-btn.primary {
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: white; border-color: transparent;
+      box-shadow: 0 2px 10px rgba(37,99,235,.25);
+    }
+    .note-btn.primary:hover { opacity: .9; }
+
+    /* ─── MARKDOWN STYLING ────────────────────────────────── */
+    .bubble-ai strong { color: var(--blue); }
+    .bubble-ai code {
+      background: var(--gray-100); padding: 1px 6px; border-radius: 4px;
+      font-size: 13px; font-family: monospace;
+    }
+    .bubble-ai pre {
+      background: var(--gray-900); color: #e2e8f0;
+      border-radius: 10px; padding: 14px 16px; margin: 8px 0;
+      font-size: 13px; overflow-x: auto;
+    }
+    .bubble-ai ul, .bubble-ai ol { padding-left: 20px; margin: 6px 0; }
+    .bubble-ai li { margin-bottom: 4px; }
+    .bubble-ai h3 { font-size: 15px; color: var(--gray-900); margin-bottom: 6px; margin-top: 10px; }
+    .bubble-ai hr { border: none; border-top: 1px solid var(--gray-200); margin: 10px 0; }
+
+    @media (max-width:900px) { .right-panel { display: none; } }
+    @media (max-width:768px) { .sidebar { display: none; } .main { margin-left: 0; } }
+  </style>
+</head>
+<body>
+
+  <!-- ─── SIDEBAR ────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-icon">த</div>
+      <span class="logo-text">Tamil<span>AI</span></span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a class="nav-item" href="dashboard.html"><div class="nav-icon">🏠</div> Dashboard</a>
+      <a class="nav-item active" href="tutor.html"><div class="nav-icon">🤖</div> AI Tutor <span class="nav-badge">New</span></a>
+      <a class="nav-item" href="#"><div class="nav-icon">🎤</div> Voice Tutor</a>
+      <a class="nav-item" href="#"><div class="nav-icon">📚</div> My Textbooks</a>
+      <div class="nav-section-label" style="margin-top:8px">Learning</div>
+      <a class="nav-item" href="#"><div class="nav-icon">❓</div> Quiz Generator</a>
+      <a class="nav-item" href="#"><div class="nav-icon">📝</div> Notes AI</a>
+      <a class="nav-item" href="#"><div class="nav-icon">📅</div> Study Planner</a>
+      <div class="nav-section-label" style="margin-top:8px">Track</div>
+      <a class="nav-item" href="#"><div class="nav-icon">📈</div> My Progress</a>
+      <a class="nav-item" href="#"><div class="nav-icon">🏆</div> Leaderboard</a>
+    </nav>
+  </aside>
+
+  <!-- ─── MAIN ───────────────────────────────────────────── -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <div class="tutor-topbar">
+      <div class="tutor-av">🤖</div>
+      <div class="tutor-info">
+        <div class="tutor-name">TamilAI Tutor</div>
+        <div class="tutor-status">
+          <span class="online-dot"></span> Online · Powered by Google Gemini
+        </div>
+      </div>
+      <div class="tutor-actions">
+        <button class="topbar-btn" onclick="clearChat()">🗑 Clear chat</button>
+        <button class="topbar-btn" onclick="saveSession()">💾 Save session</button>
+        <button class="topbar-btn" onclick="location.href='dashboard.html'">← Dashboard</button>
+      </div>
+    </div>
+
+    <!-- Chat + Right panel -->
+    <div class="chat-layout">
+
+      <!-- Chat Area -->
+      <div class="chat-area">
+
+        <!-- Messages scroll -->
+        <div class="messages-scroll" id="messagesScroll">
+          <!-- Welcome state -->
+          <div class="welcome-state" id="welcomeState">
+            <div class="welcome-icon">🤖</div>
+            <div class="welcome-title">உங்கள் AI ஆசிரியர்!</div>
+            <div class="welcome-sub">
+              நான் TamilAI Tutor. உங்கள் கேள்விகளை தமிழில் கேளுங்கள் — கணிதம், அறிவியல், சமூகவியல், தமிழ் — எந்த பாடமும் சரி!
+            </div>
+
+            <div class="suggested-questions">
+              <button class="suggested-q" onclick="askSuggested(this)">ஒளிச்சேர்க்கை என்றால் என்ன? எளிமையாக விளக்குங்கள்.</button>
+              <button class="suggested-q" onclick="askSuggested(this)">நியூட்டன் மூன்று இயக்க விதிகளை விவரியுங்கள்.</button>
+              <button class="suggested-q" onclick="askSuggested(this)">வட்டியை எப்படி கணக்கிடுவது? உதாரணம் தாருங்கள்.</button>
+              <button class="suggested-q" onclick="askSuggested(this)">தமிழ் இலக்கணத்தில் வேற்றுமை என்றால் என்ன?</button>
+              <button class="suggested-q" onclick="askSuggested(this)">இரத்த ஓட்ட மண்டலத்தை விளக்குங்கள்.</button>
+              <button class="suggested-q" onclick="askSuggested(this)">Algebra-ல் equation solve எப்படி செய்வது?</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-area">
+          <div class="subject-pills" id="subjectPills">
+            <div class="subj-pill active" data-subj="General" onclick="selectSubject(this)">🌟 General</div>
+            <div class="subj-pill" data-subj="Science" onclick="selectSubject(this)">🔬 அறிவியல்</div>
+            <div class="subj-pill" data-subj="Maths" onclick="selectSubject(this)">📐 கணிதம்</div>
+            <div class="subj-pill" data-subj="Social" onclick="selectSubject(this)">🌍 சமூகவியல்</div>
+            <div class="subj-pill" data-subj="Tamil" onclick="selectSubject(this)">📖 தமிழ்</div>
+            <div class="subj-pill" data-subj="English" onclick="selectSubject(this)">🔤 English</div>
+            <div class="subj-pill" data-subj="Physics" onclick="selectSubject(this)">⚛️ Physics</div>
+            <div class="subj-pill" data-subj="Chemistry" onclick="selectSubject(this)">🧪 Chemistry</div>
+          </div>
+
+          <div class="input-box">
+            <textarea id="chatInput" placeholder="உங்கள் கேள்வியை இங்கே தட்டச்சு செய்யுங்கள்... (Type your question in Tamil or English)" rows="1"></textarea>
+            <div class="input-btns">
+              <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()" title="Voice input">🎤</button>
+              <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Send">
+                <svg class="send-icon" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="input-hint">Press Enter to send · Shift+Enter for new line · 🎤 for voice input</div>
+        </div>
+
+      </div><!-- /chat-area -->
+
+      <!-- Right Panel -->
+      <div class="right-panel">
+
+        <div class="rpanel-section">
+          <div class="rpanel-title">Recent Sessions</div>
+          <div class="session-list">
+            <div class="session-item active">
+              <div class="session-title">New conversation</div>
+              <div class="session-sub">Just started</div>
+            </div>
+            <div class="session-item">
+              <div class="session-title">ஒளிச்சேர்க்கை பற்றி</div>
+              <div class="session-sub">அறிவியல் · Yesterday · 8 msgs</div>
+            </div>
+            <div class="session-item">
+              <div class="session-title">Newton's Laws Explained</div>
+              <div class="session-sub">Physics · 2 days ago · 12 msgs</div>
+            </div>
+            <div class="session-item">
+              <div class="session-title">Algebra practice</div>
+              <div class="session-sub">Maths · 3 days ago · 6 msgs</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rpanel-section">
+          <div class="rpanel-title">Topic Suggestions</div>
+          <div class="topic-chips" id="topicChips">
+            <span class="topic-chip" onclick="askTopic(this)">ஒளிச்சேர்க்கை</span>
+            <span class="topic-chip" onclick="askTopic(this)">வட்டி கணக்கு</span>
+            <span class="topic-chip" onclick="askTopic(this)">Newton's Laws</span>
+            <span class="topic-chip" onclick="askTopic(this)">DNA Structure</span>
+            <span class="topic-chip" onclick="askTopic(this)">தமிழ் இலக்கணம்</span>
+            <span class="topic-chip" onclick="askTopic(this)">Chemical Bonding</span>
+            <span class="topic-chip" onclick="askTopic(this)">Fractions</span>
+            <span class="topic-chip" onclick="askTopic(this)">World History</span>
+          </div>
+        </div>
+
+        <div class="rpanel-section">
+          <div class="rpanel-title">This Session</div>
+          <div style="display:flex; flex-direction:column; gap:8px; font-size:13px;">
+            <div style="display:flex; justify-content:space-between; color:var(--gray-600)">
+              <span>Messages</span>
+              <strong id="msgCount" style="color:var(--gray-900)">0</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; color:var(--gray-600)">
+              <span>XP Earned</span>
+              <strong style="color:var(--amber)" id="xpEarned">+0 ⚡</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; color:var(--gray-600)">
+              <span>Subject</span>
+              <strong id="currSubject" style="color:var(--blue)">General</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="rpanel-section">
+          <div class="rpanel-title">Quick Actions</div>
+          <button class="note-btn primary" onclick="generateQuiz()">❓ Generate Quiz</button>
+          <button class="note-btn" onclick="generateNotes()">📝 Generate Notes</button>
+          <button class="note-btn" onclick="saveSession()">💾 Save Session</button>
+        </div>
+
+      </div><!-- /right-panel -->
+
+    </div><!-- /chat-layout -->
+  </div><!-- /main -->
+
+  <script>
+    const API = 'http://localhost:5000/api';
+    const token = localStorage.getItem('tamilai_token');
+    const user  = JSON.parse(localStorage.getItem('tamilai_user') || '{"name":"Student"}');
+
+    let messages = [];
+    let sessionId = 'session_' + Date.now();
+    let currentSubject = 'General';
+    let isLoading = false;
+    let msgXP = 0;
+    let recognition = null;
+    let isRecording = false;
+
+    const scrollEl = document.getElementById('messagesScroll');
+    const inputEl  = document.getElementById('chatInput');
+    const sendBtn  = document.getElementById('sendBtn');
+
+    // Auto-resize textarea
+    inputEl.addEventListener('input', () => {
+      inputEl.style.height = 'auto';
+      inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
+    });
+
+    // Enter key
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    });
+
+    function selectSubject(el) {
+      document.querySelectorAll('.subj-pill').forEach(p => p.classList.remove('active'));
+      el.classList.add('active');
+      currentSubject = el.dataset.subj;
+      document.getElementById('currSubject').textContent = currentSubject;
+    }
+
+    function askSuggested(btn) {
+      inputEl.value = btn.textContent.trim();
+      sendMessage();
+    }
+
+    function askTopic(el) {
+      inputEl.value = `${el.textContent.trim()} பற்றி விளக்குங்கள்`;
+      inputEl.focus();
+    }
+
+    function hideWelcome() {
+      const ws = document.getElementById('welcomeState');
+      if (ws) { ws.style.display = 'none'; }
+    }
+
+    function addMessage(role, content, animated = true) {
+      hideWelcome();
+      const row = document.createElement('div');
+      row.className = `msg-row ${role}`;
+
+      const initials = user.name ? user.name[0].toUpperCase() : 'ஸ்';
+      const avHTML = role === 'user'
+        ? `<div class="msg-av av-user">${initials}</div>`
+        : `<div class="msg-av av-ai">AI</div>`;
+
+      const time = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+
+      let actionsHTML = '';
+      if (role === 'assistant') {
+        actionsHTML = `
+          <div class="msg-actions">
+            <button class="msg-action-btn" onclick="copyMsg(this)">📋 Copy</button>
+            <button class="msg-action-btn" onclick="likeMsg(this)">👍 Like</button>
+            <button class="msg-action-btn" onclick="saveMsg(this)">🔖 Save</button>
+          </div>`;
+      }
+
+      const bubbleClass = role === 'user' ? 'bubble-user' : 'bubble-ai bubble-tamil';
+      const formattedContent = role === 'assistant' ? formatMarkdown(content) : escapeHtml(content);
+
+      row.innerHTML = `
+        ${avHTML}
+        <div class="msg-content">
+          <div class="msg-bubble ${bubbleClass}">${formattedContent}</div>
+          <div class="msg-time">${time}</div>
+          ${actionsHTML}
+        </div>`;
+
+      scrollEl.appendChild(row);
+      scrollToBottom();
+
+      messages.push({ role: role === 'user' ? 'user' : 'assistant', content });
+      updateStats();
+    }
+
+    function showTyping() {
+      const row = document.createElement('div');
+      row.className = 'msg-row'; row.id = 'typingRow';
+      row.innerHTML = `
+        <div class="msg-av av-ai">AI</div>
+        <div class="typing-bubble">
+          <div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div>
+        </div>`;
+      scrollEl.appendChild(row);
+      scrollToBottom();
+    }
+
+    function hideTyping() {
+      const t = document.getElementById('typingRow');
+      if (t) t.remove();
+    }
+
+    function scrollToBottom() {
+      setTimeout(() => { scrollEl.scrollTop = scrollEl.scrollHeight; }, 50);
+    }
+
+    function updateStats() {
+      const userMsgs = messages.filter(m => m.role === 'user').length;
+      document.getElementById('msgCount').textContent = messages.length;
+      msgXP = userMsgs * 10;
+      document.getElementById('xpEarned').textContent = `+${msgXP} ⚡`;
+    }
+
+    async function sendMessage() {
+      const text = inputEl.value.trim();
+      if (!text || isLoading) return;
+
+      inputEl.value = '';
+      inputEl.style.height = 'auto';
+      isLoading = true;
+      sendBtn.disabled = true;
+
+      addMessage('user', text);
+      showTyping();
+
+      try {
+        const res = await fetch(`${API}/chat/ask`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token || ''}`
+          },
+          body: JSON.stringify({
+            message: text,
+            subject: currentSubject,
+            session_id: sessionId,
+            history: messages.slice(-10)  // last 10 messages for context
+          })
+        });
+
+        hideTyping();
+
+        if (res.ok) {
+          const data = await res.json();
+          addMessage('assistant', data.response);
+          if (data.related_topics) addRelatedTopics(data.related_topics);
+        } else {
+          // Fallback: direct demo response
+          addMessage('assistant', getDemoResponse(text));
+        }
+      } catch {
+        hideTyping();
+        // If API not available, use demo mode
+        await delay(1200);
+        addMessage('assistant', getDemoResponse(text));
+      }
+
+      isLoading = false;
+      sendBtn.disabled = false;
+      inputEl.focus();
+    }
+
+    function getDemoResponse(question) {
+      const q = question.toLowerCase();
+      if (q.includes('ஒளிச்சேர்க்கை') || q.includes('photosynthesis')) {
+        return `## 🌿 ஒளிச்சேர்க்கை (Photosynthesis)\n\nஒளிச்சேர்க்கை என்பது **பச்சை தாவரங்கள்** சூரிய ஒளியை உணவாக மாற்றும் செயல்முறை.\n\n**சமன்பாடு:**\n\`CO₂ + H₂O + சூரிய ஒளி → குளுக்கோஸ் + O₂\`\n\n**நடைபெறும் இடம்:** குளோரோபிளாஸ்ட் (Chloroplast)\n\n**முக்கிய படிகள்:**\n- 1️⃣ ஒளி ஈர்ப்பு — சூரிய ஒளி கிளோரோபில் மூலம் உறிஞ்சப்படும்\n- 2️⃣ நீரின் பகுப்பு — H₂O பிரிந்து O₂ வெளியேறும்\n- 3️⃣ குளுக்கோஸ் உற்பத்தி — CO₂ மூலம் சர்க்கரை உருவாகும்\n\nநாம் மூச்சு விடும் ஆக்சிஜன் இதிலிருந்தே வருகிறது! 🌱`;
+      }
+      if (q.includes('newton') || q.includes('நியூட்டன்')) {
+        return `## ⚛️ நியூட்டன் இயக்க விதிகள்\n\n**முதல் விதி (Inertia Law):**\nஒரு பொருள் ஓய்வில் இருந்தால் ஓய்வில் இருக்கும்; இயக்கத்தில் இருந்தால் இயக்கத்தில் இருக்கும் — வெளிப்புற விசை இல்லாவிட்டால்.\n\n**இரண்டாம் விதி (F = ma):**\n\`விசை = திணிவு × முடுக்கம்\`\nF = ma\n\n**மூன்றாம் விதி (Action-Reaction):**\nஒவ்வொரு செயலுக்கும் சமம் மற்றும் எதிர் திசையில் எதிர்வினை உண்டு.\n\n💡 **எளிய உதாரணம்:** ஒரு பந்தை சுவரில் தூக்கி எறிந்தால் சுவர் திரும்பவும் தள்ளும் — இதுவே 3வது விதி!`;
+      }
+      return `நன்றி உங்கள் கேள்விக்கு! 🙏\n\nநீங்கள் கேட்டது: **"${question}"**\n\nஇந்த கேள்விக்கு நான் விரைவில் பதில் சொல்கிறேன். TamilAI API-ஐ இணைத்தால் உடனடி பதில் கிடைக்கும்.\n\n**இதுவரை கேட்கலாம்:**\n- ஒளிச்சேர்க்கை பற்றி\n- Newton விதிகள் பற்றி\n- எந்த அறிவியல் தலைப்பும்\n\n*Demo mode இயங்குகிறது — Backend API-ஐ இணைக்கவும்* 🔧`;
+    }
+
+    function addRelatedTopics(topics) {
+      const lastMsg = scrollEl.lastElementChild?.querySelector('.msg-content');
+      if (!lastMsg || !topics.length) return;
+      const chipsDiv = document.createElement('div');
+      chipsDiv.className = 'related-chips';
+      topics.forEach(t => {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.textContent = '→ ' + t;
+        chip.onclick = () => { inputEl.value = t + ' பற்றி விளக்குங்கள்'; sendMessage(); };
+        chipsDiv.appendChild(chip);
+      });
+      lastMsg.appendChild(chipsDiv);
+    }
+
+    function formatMarkdown(text) {
+      return text
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/^### (.+)/gm, '<h3>$1</h3>')
+        .replace(/^## (.+)/gm, '<h3>$1</h3>')
+        .replace(/^- (.+)/gm, '<li>$1</li>')
+        .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+        .replace(/\n\n/g, '<br/><br/>')
+        .replace(/\n/g, '<br/>');
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    function copyMsg(btn) {
+      const bubble = btn.closest('.msg-content')?.querySelector('.msg-bubble');
+      navigator.clipboard.writeText(bubble?.innerText || '');
+      btn.textContent = '✅ Copied'; setTimeout(() => btn.textContent = '📋 Copy', 1500);
+    }
+
+    function likeMsg(btn) {
+      btn.textContent = '👍 Liked'; btn.style.color = 'var(--blue)';
+    }
+
+    function saveMsg(btn) {
+      btn.textContent = '🔖 Saved'; btn.style.color = 'var(--purple)';
+    }
+
+    function clearChat() {
+      if (!confirm('Clear this conversation?')) return;
+      messages = [];
+      sessionId = 'session_' + Date.now();
+      scrollEl.innerHTML = `
+        <div class="welcome-state" id="welcomeState">
+          <div class="welcome-icon">🤖</div>
+          <div class="welcome-title">உங்கள் AI ஆசிரியர்!</div>
+          <div class="welcome-sub">கேள்விகளை தமிழில் கேளுங்கள்!</div>
+        </div>`;
+      updateStats();
+    }
+
+    function saveSession() {
+      const sessions = JSON.parse(localStorage.getItem('tamilai_sessions') || '[]');
+      sessions.unshift({ id: sessionId, messages, subject: currentSubject, date: new Date().toISOString() });
+      localStorage.setItem('tamilai_sessions', JSON.stringify(sessions.slice(0, 20)));
+      alert('Session saved! ✅');
+    }
+
+    function generateQuiz() {
+      const lastAI = messages.filter(m => m.role === 'assistant').slice(-1)[0];
+      if (!lastAI) { alert('Ask a question first to generate a quiz!'); return; }
+      alert('Quiz generator coming in the next module! Generate quiz based on this conversation.');
+    }
+
+    function generateNotes() {
+      const lastAI = messages.filter(m => m.role === 'assistant').slice(-1)[0];
+      if (!lastAI) { alert('Ask a question first to generate notes!'); return; }
+      alert('Notes generator coming in the next module!');
+    }
+
+    // Voice input
+    function toggleVoice() {
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        alert('Speech recognition is not supported in this browser. Please use Chrome.');
+        return;
+      }
+      if (isRecording) {
+        recognition?.stop(); return;
+      }
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SR();
+      recognition.lang = 'ta-IN';
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.onstart = () => {
+        isRecording = true;
+        document.getElementById('voiceBtn').classList.add('recording');
+        document.getElementById('voiceBtn').textContent = '🔴';
+      };
+      recognition.onresult = (e) => {
+        const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
+        inputEl.value = transcript;
+      };
+      recognition.onend = () => {
+        isRecording = false;
+        document.getElementById('voiceBtn').classList.remove('recording');
+        document.getElementById('voiceBtn').textContent = '🎤';
+        if (inputEl.value.trim()) sendMessage();
+      };
+      recognition.start();
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/logout.js"></script>
+<script>
+(async function () {
+
+    const { data } = await supabaseClient.auth.getSession();
+
+    if (!data.session) {
+        window.location.href = "auth.html";
+    }
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TamilAI – Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue:#2563EB; --blue-light:#3B82F6; --blue-dark:#1D4ED8;
+      --purple:#7C3AED; --purple-light:#8B5CF6;
+      --cyan:#06B6D4; --cyan-light:#22D3EE;
+      --green:#10B981; --amber:#F59E0B; --red:#EF4444;
+      --gray-50:#F8FAFC; --gray-100:#F1F5F9; --gray-200:#E2E8F0;
+      --gray-300:#CBD5E1; --gray-400:#94A3B8; --gray-500:#64748B;
+      --gray-600:#475569; --gray-700:#334155; --gray-800:#1E293B; --gray-900:#0F172A;
+      --white:#FFFFFF;
+      --sidebar-w: 260px;
+      --font:'Inter',sans-serif;
+      --font-tamil:'Noto Sans Tamil','Inter',sans-serif;
+    }
+
+    html, body { height: 100%; }
+    body {
+      font-family: var(--font); background: var(--gray-50);
+      color: var(--gray-800); display: flex;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── SIDEBAR ─────────────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-w); flex-shrink: 0;
+      background: white; border-right: 1px solid var(--gray-200);
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
+      transition: transform 0.3s;
+    }
+
+    .sidebar-header {
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid var(--gray-100);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .logo-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; color: white; font-weight: 800;
+      font-family: var(--font-tamil); flex-shrink: 0;
+    }
+    .logo-text { font-size: 17px; font-weight: 700; color: var(--gray-900); }
+    .logo-text span { background: linear-gradient(135deg, var(--blue), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+    .sidebar-user {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .user-card {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 10px;
+      background: var(--gray-50); cursor: pointer;
+      transition: background 0.2s;
+    }
+    .user-card:hover { background: var(--gray-100); }
+    .user-av {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: white; flex-shrink: 0;
+    }
+    .user-name { font-size: 13px; font-weight: 600; color: var(--gray-800); }
+    .user-grade { font-size: 11px; color: var(--gray-400); }
+    .xp-badge {
+      margin-left: auto; font-size: 11px; font-weight: 700;
+      color: var(--amber); background: rgba(245,158,11,.1);
+      padding: 3px 8px; border-radius: 99px; white-space: nowrap;
+    }
+
+    .sidebar-nav { flex: 1; padding: 12px 12px; overflow-y: auto; }
+
+    .nav-section-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--gray-400);
+      padding: 8px 8px 6px;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 8px;
+      font-size: 14px; font-weight: 500; color: var(--gray-600);
+      cursor: pointer; margin-bottom: 2px;
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-item:hover { background: var(--gray-50); color: var(--gray-900); }
+    .nav-item.active {
+      background: rgba(37,99,235,.08); color: var(--blue); font-weight: 600;
+    }
+    .nav-item.active .nav-icon { background: var(--blue); }
+    .nav-icon {
+      width: 28px; height: 28px; border-radius: 6px;
+      background: var(--gray-200); display: flex; align-items: center;
+      justify-content: center; font-size: 14px; flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .nav-badge {
+      margin-left: auto; font-size: 10px; font-weight: 700;
+      color: white; background: var(--blue);
+      padding: 2px 7px; border-radius: 99px;
+    }
+
+    .sidebar-footer {
+      padding: 12px 12px;
+      border-top: 1px solid var(--gray-100);
+    }
+    .streak-pill {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 12px; border-radius: 8px;
+      background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.2);
+    }
+    .streak-num { font-size: 20px; font-weight: 800; color: var(--amber); }
+    .streak-label { font-size: 12px; color: var(--gray-600); font-weight: 500; }
+    .streak-dots { display: flex; gap: 3px; margin-left: auto; }
+    .streak-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gray-200); }
+    .streak-dot.lit { background: var(--amber); }
+
+    /* ─── MAIN ────────────────────────────────────────────── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1; display: flex; flex-direction: column; min-height: 100vh;
+    }
+
+    /* ─── TOP BAR ─────────────────────────────────────────── */
+    .topbar {
+      background: white; border-bottom: 1px solid var(--gray-200);
+      padding: 0 32px; height: 64px;
+      display: flex; align-items: center; gap: 16px;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar-title { font-size: 18px; font-weight: 700; color: var(--gray-900); }
+    .topbar-sub   { font-size: 13px; color: var(--gray-400); margin-top: 1px; }
+
+    .topbar-search {
+      margin-left: auto; position: relative;
+    }
+    .search-input {
+      width: 240px; padding: 8px 12px 8px 36px;
+      border: 1.5px solid var(--gray-200); border-radius: 8px;
+      font-size: 13px; font-family: var(--font); color: var(--gray-700);
+      background: var(--gray-50); outline: none;
+      transition: border-color 0.2s, width 0.3s;
+    }
+    .search-input:focus { border-color: var(--blue); background: white; width: 300px; }
+    .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--gray-400); font-size: 14px; }
+
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+    .icon-btn {
+      width: 36px; height: 36px; border-radius: 8px;
+      border: 1.5px solid var(--gray-200); background: white;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 16px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .icon-btn:hover { border-color: var(--blue); background: rgba(37,99,235,.04); }
+    .notif-dot { position: relative; }
+    .notif-dot::after {
+      content: ''; position: absolute; top: 6px; right: 6px;
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--red); border: 1.5px solid white;
+    }
+
+    /* ─── CONTENT ─────────────────────────────────────────── */
+    .content { padding: 28px 32px; flex: 1; }
+
+    /* ─── GREETING BANNER ─────────────────────────────────── */
+    .greeting-banner {
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      border-radius: 16px; padding: 28px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 28px; position: relative; overflow: hidden;
+    }
+    .greeting-banner::before {
+      content: ''; position: absolute; right: -20px; top: -20px;
+      width: 180px; height: 180px; border-radius: 50%;
+      background: rgba(255,255,255,.06);
+    }
+    .greeting-banner::after {
+      content: ''; position: absolute; right: 60px; bottom: -40px;
+      width: 120px; height: 120px; border-radius: 50%;
+      background: rgba(255,255,255,.04);
+    }
+    .greeting-left { position: relative; z-index: 1; }
+    .greeting-time  { font-size: 13px; color: rgba(255,255,255,.7); margin-bottom: 4px; }
+    .greeting-name  { font-size: 24px; font-weight: 800; color: white; margin-bottom: 6px; }
+    .greeting-tamil { font-size: 15px; color: rgba(255,255,255,.8); font-family: var(--font-tamil); }
+    .greeting-right { display: flex; gap: 12px; position: relative; z-index: 1; }
+    .greeting-stat {
+      text-align: center; background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.2);
+      border-radius: 12px; padding: 14px 20px; min-width: 80px;
+    }
+    .g-stat-num   { font-size: 24px; font-weight: 800; color: white; }
+    .g-stat-label { font-size: 11px; color: rgba(255,255,255,.7); margin-top: 2px; }
+
+    /* ─── STAT CARDS ROW ──────────────────────────────────── */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+
+    .stat-card {
+      background: white; border: 1px solid var(--gray-200);
+      border-radius: 14px; padding: 20px 20px;
+      display: flex; align-items: center; gap: 14px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: default;
+    }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.08); }
+    .stat-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; flex-shrink: 0;
+    }
+    .stat-info {}
+    .stat-num   { font-size: 26px; font-weight: 800; color: var(--gray-900); line-height: 1; }
+    .stat-label { font-size: 12px; color: var(--gray-500); margin-top: 3px; font-weight: 500; }
+    .stat-change { font-size: 11px; margin-top: 4px; font-weight: 600; }
+    .stat-change.up { color: var(--green); }
+    .stat-change.down { color: var(--red); }
+
+    /* ─── GRID LAYOUT ─────────────────────────────────────── */
+    .dashboard-grid { display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
+
+    /* ─── SECTION CARD ────────────────────────────────────── */
+    .card {
+      background: white; border: 1px solid var(--gray-200);
+      border-radius: 14px; overflow: hidden;
+    }
+    .card-header {
+      padding: 18px 20px 0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-title { font-size: 15px; font-weight: 700; color: var(--gray-900); }
+    .card-action {
+      font-size: 12px; color: var(--blue); font-weight: 600;
+      cursor: pointer; text-decoration: none;
+    }
+    .card-action:hover { text-decoration: underline; }
+    .card-body { padding: 16px 20px 20px; }
+
+    /* ─── QUICK ACTIONS ───────────────────────────────────── */
+    .quick-actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+    .quick-btn {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px; border-radius: 12px;
+      border: 1.5px solid var(--gray-200); background: white;
+      cursor: pointer; text-decoration: none;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+    .quick-btn:hover { border-color: var(--blue); transform: translateY(-2px); box-shadow: 0 4px 14px rgba(37,99,235,.12); }
+    .quick-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;
+    }
+    .quick-label { font-size: 13px; font-weight: 600; color: var(--gray-800); }
+    .quick-sub   { font-size: 11px; color: var(--gray-400); margin-top: 1px; }
+
+    /* ─── PROGRESS BARS ───────────────────────────────────── */
+    .subject-list { display: flex; flex-direction: column; gap: 14px; }
+    .subj-row { display: flex; flex-direction: column; gap: 6px; }
+    .subj-top { display: flex; justify-content: space-between; align-items: center; }
+    .subj-name { font-size: 13px; font-weight: 600; color: var(--gray-700); }
+    .subj-pct  { font-size: 13px; font-weight: 700; }
+    .prog-bar  { height: 8px; background: var(--gray-100); border-radius: 99px; overflow: hidden; }
+    .prog-fill { height: 100%; border-radius: 99px; transition: width 1.2s ease; }
+
+    /* ─── RECENT ACTIVITY ─────────────────────────────────── */
+    .activity-list { display: flex; flex-direction: column; gap: 10px; }
+    .activity-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 12px; border-radius: 10px;
+      background: var(--gray-50); border: 1px solid var(--gray-100);
+    }
+    .act-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+    .act-text { font-size: 13px; color: var(--gray-700); font-weight: 500; }
+    .act-sub  { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
+    .act-badge {
+      margin-left: auto; font-size: 11px; font-weight: 700;
+      padding: 3px 8px; border-radius: 99px; white-space: nowrap; flex-shrink: 0;
+    }
+    .badge-green { background: rgba(16,185,129,.1); color: #059669; }
+    .badge-blue  { background: rgba(37,99,235,.1);  color: var(--blue); }
+    .badge-amber { background: rgba(245,158,11,.1); color: #B45309; }
+
+    /* ─── TODAY'S PLAN ────────────────────────────────────── */
+    .plan-list { display: flex; flex-direction: column; gap: 8px; }
+    .plan-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 12px; border-radius: 10px;
+      border: 1px solid var(--gray-200); cursor: pointer;
+      transition: background 0.2s;
+    }
+    .plan-item:hover { background: var(--gray-50); }
+    .plan-check {
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 2px solid var(--gray-300); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: transparent;
+      transition: all 0.2s;
+    }
+    .plan-item.done .plan-check {
+      background: var(--green); border-color: var(--green); color: white;
+    }
+    .plan-subject { font-size: 13px; font-weight: 600; color: var(--gray-800); }
+    .plan-topic   { font-size: 11px; color: var(--gray-400); font-family: var(--font-tamil); }
+    .plan-time {
+      margin-left: auto; font-size: 11px; font-weight: 700;
+      color: var(--gray-400); white-space: nowrap;
+    }
+
+    /* ─── STREAK CALENDAR ─────────────────────────────────── */
+    .streak-cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 12px; }
+    .cal-day { aspect-ratio:1; border-radius:5px; background: var(--gray-100); }
+    .cal-day.active { background: var(--blue); }
+    .cal-day.active.fire { background: linear-gradient(135deg, var(--blue), var(--purple)); }
+
+    /* ─── LEADERBOARD MINI ────────────────────────────────── */
+    .lb-list { display: flex; flex-direction: column; gap: 8px; }
+    .lb-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 12px; border-radius: 8px;
+      transition: background 0.2s;
+    }
+    .lb-item:hover { background: var(--gray-50); }
+    .lb-item.me { background: rgba(37,99,235,.05); border: 1px solid rgba(37,99,235,.1); border-radius: 10px; }
+    .lb-rank { font-size: 13px; font-weight: 800; color: var(--gray-400); width: 24px; text-align: center; }
+    .lb-rank.gold   { color: #F59E0B; }
+    .lb-rank.silver { color: #94A3B8; }
+    .lb-rank.bronze { color: #B45309; }
+    .lb-av {
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: white; flex-shrink: 0;
+    }
+    .lb-name  { font-size: 13px; font-weight: 600; color: var(--gray-800); }
+    .lb-grade { font-size: 11px; color: var(--gray-400); }
+    .lb-xp    { margin-left: auto; font-size: 12px; font-weight: 700; color: var(--amber); }
+
+    /* ─── RESPONSIVE ──────────────────────────────────────── */
+    @media (max-width: 1100px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .main { margin-left: 0; }
+      .content { padding: 20px 16px; }
+      .topbar { padding: 0 16px; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .quick-actions { grid-template-columns: 1fr; }
+      .greeting-right { display: none; }
+    }
+
+    /* Animations */
+    .fade-up { opacity: 0; transform: translateY(16px); animation: fadeUp 0.5s ease forwards; }
+    @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+    .fade-up:nth-child(1) { animation-delay: 0s; }
+    .fade-up:nth-child(2) { animation-delay: 0.05s; }
+    .fade-up:nth-child(3) { animation-delay: 0.1s; }
+    .fade-up:nth-child(4) { animation-delay: 0.15s; }
+  </style>
+</head>
+<body>
+
+  <!-- ─── SIDEBAR ────────────────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-icon">த</div>
+      <span class="logo-text">Tamil<span>AI</span></span>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-card">
+        <div class="user-av" id="sidebarAv">அ</div>
+        <div>
+          <div class="user-name" id="sidebarName">Student</div>
+          <div class="user-grade" id="sidebarGrade">Class 10</div>
+        </div>
+        <div class="xp-badge" id="sidebarXP">⚡ 0 XP</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a class="nav-item active" href="dashboard.html">
+        <div class="nav-icon">🏠</div> Dashboard
+      </a>
+      <a class="nav-item" href="tutor.html">
+        <div class="nav-icon">🤖</div> AI Tutor
+        <span class="nav-badge">New</span>
+      </a>
+      <a class="nav-item" href="voice.html">
+        <div class="nav-icon">🎤</div> Voice Tutor
+      </a>
+      <a class="nav-item" href="textbook.html">
+        <div class="nav-icon">📚</div> My Textbooks
+      </a>
+
+      <div class="nav-section-label" style="margin-top:8px">Learning</div>
+      <a class="nav-item" href="quiz.html">
+        <div class="nav-icon">❓</div> Quiz Generator
+      </a>
+      <a class="nav-item" href="notes.html">
+        <div class="nav-icon">📝</div> Notes AI
+      </a>
+      <a class="nav-item" href="planner.html">
+        <div class="nav-icon">📅</div> Study Planner
+      </a>
+
+      <div class="nav-section-label" style="margin-top:8px">Track</div>
+      <a class="nav-item" href="progress.html">
+        <div class="nav-icon">📈</div> My Progress
+      </a>
+      
+      <a class="nav-item" href="achievements.html">
+        <div class="nav-icon">🎖</div> Achievements
+      </a>
+
+      <div class="nav-section-label" style="margin-top:8px">Account</div>
+      <a class="nav-item" href="profile.html">
+        <div class="nav-icon">👤</div> Profile
+      </a>
+      <a class="nav-item" href="#" onclick="event.preventDefault(); logout();">
+        <div class="nav-icon">🚪</div> Sign out
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="streak-pill">
+        <div>
+          <div class="streak-num" id="streakNum">🔥 0</div>
+          <div class="streak-label">Day streak</div>
+        </div>
+        <div class="streak-dots" id="streakDots"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ─── MAIN CONTENT ───────────────────────────────────── -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Dashboard</div>
+        <div class="topbar-sub" id="todayDate">Today</div>
+      </div>
+      <div class="topbar-search">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" type="text" placeholder="Search topics, subjects…"/>
+      </div>
+      <div class="topbar-actions">
+        <div class="icon-btn notif-dot" title="Notifications">🔔</div>
+        <div class="icon-btn" title="Settings">⚙️</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Greeting Banner -->
+      <div class="greeting-banner fade-up">
+        <div class="greeting-left">
+          <div class="greeting-time" id="greetTime">Good morning</div>
+          <div class="greeting-name">வணக்கம், <span id="greetName">Student</span>! 👋</div>
+          <div class="greeting-tamil">இன்று என்ன கற்போம்? உங்கள் AI ஆசிரியர் தயாராக உள்ளார்.</div>
+        </div>
+        <div class="greeting-right">
+          <div class="greeting-stat">
+            <div class="g-stat-num" id="gQuizzes">0</div>
+            <div class="g-stat-label">Quizzes Done</div>
+          </div>
+          <div class="greeting-stat">
+            <div class="g-stat-num" id="gStreak">0</div>
+            <div class="g-stat-label">Day Streak</div>
+          </div>
+          <div class="greeting-stat">
+            <div class="g-stat-num" id="gXP">0</div>
+            <div class="g-stat-label">XP Points</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="stats-row">
+        <div class="stat-card fade-up">
+          <div class="stat-icon" style="background:rgba(37,99,235,.1)">📚</div>
+          <div class="stat-info">
+            <div class="stat-num" id="statTopics">24</div>
+            <div class="stat-label">Topics Learned</div>
+            <div class="stat-change up">↑ 3 this week</div>
+          </div>
+        </div>
+        <div class="stat-card fade-up">
+          <div class="stat-icon" style="background:rgba(16,185,129,.1)">✅</div>
+          <div class="stat-info">
+            <div class="stat-num" id="statAccuracy">82%</div>
+            <div class="stat-label">Quiz Accuracy</div>
+            <div class="stat-change up">↑ 7% from last week</div>
+          </div>
+        </div>
+        <div class="stat-card fade-up">
+          <div class="stat-icon" style="background:rgba(245,158,11,.1)">⏱</div>
+          <div class="stat-info">
+            <div class="stat-num" id="statHours">4.5h</div>
+            <div class="stat-label">Study Time Today</div>
+            <div class="stat-change up">↑ Personal best!</div>
+          </div>
+        </div>
+        <div class="stat-card fade-up">
+          <div class="stat-icon" style="background:rgba(124,58,237,.1)">🏆</div>
+          <div class="stat-info">
+            <div class="stat-num" id="statRank">#12</div>
+            <div class="stat-label">Class Rank</div>
+            <div class="stat-change up">↑ +4 positions</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions + Main Grid -->
+      <div class="quick-actions fade-up">
+        <a class="quick-btn" href="tutor.html">
+          <div class="quick-icon" style="background:rgba(37,99,235,.1)">🤖</div>
+          <div>
+            <div class="quick-label">Ask AI Tutor</div>
+            <div class="quick-sub">Get instant explanations in Tamil</div>
+          </div>
+        </a>
+        <a class="quick-btn" href="#">
+          <div class="quick-icon" style="background:rgba(124,58,237,.1)">🎤</div>
+          <div>
+            <div class="quick-label">Voice Tutor</div>
+            <div class="quick-sub">Speak your doubt in Tamil</div>
+          </div>
+        </a>
+        <a class="quick-btn" href="#">
+          <div class="quick-icon" style="background:rgba(16,185,129,.1)">❓</div>
+          <div>
+            <div class="quick-label">Generate Quiz</div>
+            <div class="quick-sub">Test yourself on any topic</div>
+          </div>
+        </a>
+        <a class="quick-btn" href="#">
+          <div class="quick-icon" style="background:rgba(245,158,11,.1)">📝</div>
+          <div>
+            <div class="quick-label">AI Notes</div>
+            <div class="quick-sub">Get summaries & flashcards</div>
+          </div>
+        </a>
+      </div>
+
+      <div class="dashboard-grid">
+        <!-- LEFT COLUMN -->
+        <div style="display:flex; flex-direction:column; gap:20px">
+
+          <!-- Activity Chart -->
+          <div class="card fade-up">
+            <div class="card-header">
+              <div class="card-title">Weekly Study Activity</div>
+              <a class="card-action" href="#">View details →</a>
+            </div>
+            <div class="card-body">
+              <canvas id="activityChart" height="120"></canvas>
+            </div>
+          </div>
+
+          <!-- Recent Activity -->
+          <div class="card fade-up">
+            <div class="card-header">
+              <div class="card-title">Recent Activity</div>
+              <a class="card-action" href="#">View all →</a>
+            </div>
+            <div class="card-body">
+              <div class="activity-list">
+                <div class="activity-item">
+                  <div class="act-icon">🤖</div>
+                  <div>
+                    <div class="act-text">Asked about Photosynthesis</div>
+                    <div class="act-sub">AI Tutor · அறிவியல் · 20 mins ago</div>
+                  </div>
+                  <div class="act-badge badge-blue">+10 XP</div>
+                </div>
+                <div class="activity-item">
+                  <div class="act-icon">✅</div>
+                  <div>
+                    <div class="act-text">Completed Chapter 3 Quiz</div>
+                    <div class="act-sub">Physics · Score: 8/10 · 1 hr ago</div>
+                  </div>
+                  <div class="act-badge badge-green">+40 XP</div>
+                </div>
+                <div class="activity-item">
+                  <div class="act-icon">📝</div>
+                  <div>
+                    <div class="act-text">Generated Notes — Newton's Laws</div>
+                    <div class="act-sub">Physics · 2 hrs ago</div>
+                  </div>
+                  <div class="act-badge badge-amber">+15 XP</div>
+                </div>
+                <div class="activity-item">
+                  <div class="act-icon">📚</div>
+                  <div>
+                    <div class="act-text">Uploaded Science Textbook (Ch 5)</div>
+                    <div class="act-sub">312 pages indexed · Yesterday</div>
+                  </div>
+                  <div class="act-badge badge-blue">Indexed</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subject Progress -->
+          <div class="card fade-up">
+            <div class="card-header">
+              <div class="card-title">Subject Performance</div>
+              <a class="card-action" href="#">Analytics →</a>
+            </div>
+            <div class="card-body">
+              <div class="subject-list" id="subjectList"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div style="display:flex; flex-direction:column; gap:20px">
+
+          <!-- Today's Plan -->
+          <div class="card fade-up">
+            <div class="card-header">
+              <div class="card-title">Today's Study Plan</div>
+              <a class="card-action" href="#">Edit →</a>
+            </div>
+            <div class="card-body">
+              <div class="plan-list" id="planList"></div>
+            </div>
+          </div>
+
+          <!-- Streak Calendar -->
+          <div class="card fade-up">
+            <div class="card-header">
+              <div class="card-title">🔥 Learning Streak</div>
+            </div>
+            <div class="card-body">
+              <div style="font-size:13px; color:var(--gray-500); margin-bottom:8px">
+                <strong style="color:var(--amber); font-size:20px" id="bigStreak">14</strong> day streak · Keep it going!
+              </div>
+              <div class="streak-cal" id="streakCal"></div>
+              <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:10px; color:var(--gray-400)">
+                <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mini Leaderboard -->
+          <div class="card fade-up">
+            <div class="card-header">
+              <div class="card-title">🏆 Class Leaderboard</div>
+              <a class="card-action" href="#">View all →</a>
+            </div>
+            <div class="card-body">
+              <div class="lb-list" id="leaderList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+
+  <script>
+    const API = 'http://localhost:5000/api';
+
+    // Load user from localStorage
+    const user = JSON.parse(localStorage.getItem('tamilai_user') || '{"name":"Student","class_grade":"Class 10","xp":1250,"coins":340,"streak":14}');
+
+    function init() {
+      // Sidebar
+      const initials = user.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+      document.getElementById('sidebarAv').textContent    = initials || 'ஸ்';
+      document.getElementById('sidebarName').textContent  = user.name;
+      document.getElementById('sidebarGrade').textContent = user.class_grade || 'Student';
+      document.getElementById('sidebarXP').textContent    = `⚡ ${user.xp || 0} XP`;
+
+      // Greeting
+      const hour = new Date().getHours();
+      const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+      document.getElementById('greetTime').textContent = greet;
+      document.getElementById('greetName').textContent = user.name.split(' ')[0];
+
+      // Today's date
+      document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-IN', {weekday:'long', month:'long', day:'numeric'});
+
+      // Greeting stats (demo)
+      document.getElementById('gQuizzes').textContent = '12';
+      document.getElementById('gStreak').textContent  = user.streak || 14;
+      document.getElementById('gXP').textContent      = user.xp || 1250;
+
+      // Streak
+      document.getElementById('streakNum').textContent = `🔥 ${user.streak || 14}`;
+      const dotsEl = document.getElementById('streakDots');
+      for (let i = 0; i < 7; i++) {
+        const d = document.createElement('div');
+        d.className = 'streak-dot' + (i < (user.streak || 5) ? ' lit' : '');
+        dotsEl.appendChild(d);
+      }
+
+      renderSubjects();
+      renderPlan();
+      renderStreak();
+      renderLeaderboard();
+      renderChart();
+    }
+
+    function renderSubjects() {
+      const subjects = [
+        { name: 'அறிவியல் (Science)',  pct: 87, color: '#2563EB' },
+        { name: 'கணிதம் (Maths)',      pct: 73, color: '#7C3AED' },
+        { name: 'சமூகவியல் (Social)',  pct: 91, color: '#06B6D4' },
+        { name: 'தமிழ் (Tamil)',        pct: 65, color: '#10B981' },
+        { name: 'English',              pct: 78, color: '#F59E0B' },
+      ];
+      const el = document.getElementById('subjectList');
+      subjects.forEach(s => {
+        el.innerHTML += `
+          <div class="subj-row">
+            <div class="subj-top">
+              <span class="subj-name">${s.name}</span>
+              <span class="subj-pct" style="color:${s.color}">${s.pct}%</span>
+            </div>
+            <div class="prog-bar">
+              <div class="prog-fill" style="width:${s.pct}%; background:${s.color}"></div>
+            </div>
+          </div>`;
+      });
+    }
+
+    function renderPlan() {
+      const plan = [
+        { subj: 'அறிவியல்', topic: 'அமிலம் மற்றும் காரம்', time: '30 min', done: false },
+        { subj: 'Physics',  topic: 'நியூட்டன் விதிகள் Revision', time: '20 min', done: true },
+        { subj: 'Quiz',     topic: 'Chapter 3 Mock Test', time: '15 min', done: false },
+        { subj: 'கணிதம்',  topic: 'Algebra Practice Set 4', time: '25 min', done: false },
+      ];
+      const el = document.getElementById('planList');
+      plan.forEach((p, i) => {
+        const div = document.createElement('div');
+        div.className = 'plan-item' + (p.done ? ' done' : '');
+        div.onclick = () => div.classList.toggle('done');
+        div.innerHTML = `
+          <div class="plan-check">${p.done ? '✓' : ''}</div>
+          <div>
+            <div class="plan-subject">${p.subj}</div>
+            <div class="plan-topic">${p.topic}</div>
+          </div>
+          <div class="plan-time">${p.time}</div>`;
+        el.appendChild(div);
+      });
+    }
+
+    function renderStreak() {
+      const el = document.getElementById('streakCal');
+      for (let i = 0; i < 28; i++) {
+        const d = document.createElement('div');
+        d.className = 'cal-day';
+        if (i >= 14) d.classList.add('active');
+        if (i >= 21) d.classList.add('fire');
+        el.appendChild(d);
+      }
+    }
+
+    function renderLeaderboard() {
+      const lb = [
+        { rank:1,  name:'Priya L.',   grade:'Class 10', xp:2840, av:'P',  color:'#7C3AED' },
+        { rank:2,  name:'Arjun K.',   grade:'Class 10', xp:2640, av:'A',  color:'#2563EB' },
+        { rank:3,  name:'Kavya S.',   grade:'Class 10', xp:2510, av:'K',  color:'#06B6D4' },
+        { rank:12, name:'You',         grade:'Class 10', xp:1250, av:'👤', color:'#10B981', me:true },
+      ];
+      const el = document.getElementById('leaderList');
+      lb.forEach(p => {
+        const rankClass = p.rank === 1 ? 'gold' : p.rank === 2 ? 'silver' : p.rank === 3 ? 'bronze' : '';
+        el.innerHTML += `
+          <div class="lb-item${p.me ? ' me' : ''}">
+            <div class="lb-rank ${rankClass}">${p.rank === 1 ? '🥇' : p.rank === 2 ? '🥈' : p.rank === 3 ? '🥉' : p.rank}</div>
+            <div class="lb-av" style="background:${p.color}">${p.av}</div>
+            <div>
+              <div class="lb-name">${p.name}</div>
+              <div class="lb-grade">${p.grade}</div>
+            </div>
+            <div class="lb-xp">⚡ ${p.xp.toLocaleString()}</div>
+          </div>`;
+      });
+    }
+
+    function renderChart() {
+      const ctx = document.getElementById('activityChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          datasets: [{
+            label: 'Study Minutes',
+            data: [45, 90, 60, 120, 75, 150, 85],
+            backgroundColor: (ctx) => {
+              const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 200);
+              g.addColorStop(0, 'rgba(37,99,235,0.8)');
+              g.addColorStop(1, 'rgba(124,58,237,0.4)');
+              return g;
+            },
+            borderRadius: 6, borderSkipped: false,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { font: { size: 12 }, color: '#94A3B8' } },
+            y: { grid: { color: '#F1F5F9' }, ticks: { font: { size: 12 }, color: '#94A3B8' },
+                 title: { display: true, text: 'Minutes', color: '#94A3B8', font: { size: 11 } } }
+          }
+        }
+      });
+    }
+
+    function logout() {
+      localStorage.removeItem('tamilai_token');
+      localStorage.removeItem('tamilai_user');
+      window.location.href = 'auth.html';
+    }
+
+    init();
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/auth-guard.js"></script>
+<script src="js/logout.js"></script>
+<script>
+(async function () {
+
+    const { data } = await supabaseClient.auth.getSession();
+
+    if (!data.session) {
+        window.location.href = "auth.html";
+    }
+
+})();
+</script>
+
+<script>
+async function loadUserName() {
+
+    const { data: { user } } =
+        await supabaseClient.auth.getUser();
+
+    if (!user) return;
+
+    const { data: profile, error } =
+        await supabaseClient
+            .from("profiles")
+            .select("full_name")
+            .eq("id", user.id)
+            .single();
+
+    if (profile) {
+        document.getElementById("greetName").textContent =
+            profile.full_name;
+    }
+}
+
+loadUserName();
+</script>
+</body>
+</html>
