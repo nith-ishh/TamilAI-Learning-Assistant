@@ -60,6 +60,12 @@ def create_app():
     @app.get('/api/health')
     def health():
         return {'status': 'ok', 'message': 'TamilAI API is running'}
+    
+    @app.get("/")
+    def home():
+        return {
+        "message": "TamilAI Backend is Running 🚀"
+    }
 
     return app
 
