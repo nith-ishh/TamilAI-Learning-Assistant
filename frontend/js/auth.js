@@ -1,4 +1,4 @@
-const API = 'http://localhost:5000/api';
+const API = 'https://tamilai-backend-ev5r.onrender.com/api';
     let currentRole = 'student';
 
     // ── Panel switch ─────────────────────────────────────────
